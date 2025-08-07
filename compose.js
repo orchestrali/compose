@@ -75,6 +75,8 @@ function getcomplib(compid) {
         $("h2").text(results.title);
         $.get("courseorder"+stage+".json", function(body) {
           courseorders = body;
+          console.log(courseorders.length);
+          console.log(courseorders[0]);
           methodinfo.fcourses = findfalse();
           //console.log(methodinfo.fcourses);
           setuptools();
