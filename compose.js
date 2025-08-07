@@ -75,8 +75,8 @@ function getcomplib(compid) {
         $("h2").text(results.title);
         $.get("courseorder"+stage+".json", function(body) {
           courseorders = body;
-          console.log(courseorders.length);
-          console.log(courseorders[0]);
+          //console.log(courseorders.length);
+          //console.log(courseorders[0]);
           methodinfo.fcourses = findfalse();
           //console.log(methodinfo.fcourses);
           setuptools();
@@ -294,11 +294,11 @@ function findfalse() {
   //build the course
   //comparecourse(course)
   let cos = stage === 6 ? courseorders : courseorders.filter(o => o.incourse === true && o.tentogether === true);
-  cos.shift();
+  
   let leadlength = methodinfo.leadlength;
   //console.log("number of course orders to check: "+cos.length);
   let fcourses = [];
-  for (let i = 0; i < cos.length; i++) {
+  for (let i = 1; i < cos.length; i++) {
     let co = cos[i].co;
     let course = buildcourse(co);
     if (i === 0) {
