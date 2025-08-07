@@ -126,6 +126,24 @@ function setuptools() {
     $("#workspacegrid").append(trow);
   }
   $("#workinglist").append(`<button id="addrows">+</button>`);
+  $("#addrows").on("click", addrows);
+}
+
+function addrows(e) {
+  //console.log("add rows click");
+  let r = $("#workspacegrid tr").length+1;
+  let trow = `<tr>`;
+  let tr = `<tr id="r${r}">`;
+  let clas = ["callcol","cocol","numcol"];
+  for (let c = 1; c <= 3; c++) {
+    let cl = c === 1 ? ` class="column1"` : "";
+    if (c <= 2) trow += `<td id="r${r}c${c}"${cl}></td>`;
+    tr += `<td class="${clas[c-1]}"></td>`;
+  }
+  trow += `</tr>`;
+  tr += `</tr>`;
+  $("#workspacegrid").append(trow);
+  $("#comptable").append(tr);
 }
 
 function tablerelease(e) {
