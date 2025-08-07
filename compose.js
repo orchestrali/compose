@@ -86,6 +86,7 @@ function getcomplib(compid) {
 
 function setuptools() {
   let cos = stage === 6 ? courseorders : courseorders.filter(o => o.incourse === true && o.tentogether === true);
+  console.log(cos[0]);
   compinfo.courses = {};
   compinfo.leads = {};
   compinfo.courses[rowstring(cos[0].co)] = ["inuse"];
