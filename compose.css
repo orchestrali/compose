@@ -1,0 +1,167 @@
+
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: helvetica, arial, sans-serif;
+  margin: 25px;
+}
+
+.bold {
+  font-weight: bold;
+}
+
+.disabled {
+  color: gray;
+}
+
+form {
+  margin-bottom: 25px;
+  padding: 15px;
+  background-color: cyan;
+  display: inline-block;
+  width: 100%;
+  max-width: 578px;
+  border-radius: 3px;
+}
+
+input {
+  /*margin-bottom: 10px;*/
+  padding: 5px;
+  border: 1px solid lightgrey;
+  border-radius: 3px;
+  font-size: 16px;
+}
+  
+input:disabled {
+  background-color: #e9e9e9;
+}
+
+button {
+  font-size: 16px;
+  border-radius: 3px;
+  background-color: lightgrey;
+  border: 1px solid grey;
+  box-shadow: 2px 2px teal;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: yellow;
+}
+
+button:active {
+  box-shadow: none;
+}
+
+li {
+  margin-bottom: 5px;
+  list-style-type: none;
+}
+
+.hidden {
+  display: none;
+}
+
+p.tab {
+  margin-left: 5px;
+}
+
+table {
+  border-collapse: collapse;
+  margin: 15px;
+}
+
+#sourcematerial {
+  display: flex;
+  flex-flow: row;
+  width: 80%;
+  border: 1px solid black;
+  margin-bottom: 10px;
+}
+
+#courseorders {
+  width: 110px;
+  max-height: 220px;
+  padding-right: 8px;
+  border: 1px solid black;
+  overflow: scroll;
+}
+
+
+li.inuse {
+  background-color: rgb(209, 246, 209);
+}
+
+li.false {
+  color: gray;
+}
+
+td.false {
+  color: grey;
+}
+
+li.close {
+  background-color: pink;
+}
+td.close {
+  background-color: pink;
+}
+
+li.hasrow {
+  background-color: lavender;
+}
+
+li.selected {
+  background-color: lightblue;
+}
+td.selected {
+  background-color: lightblue;
+}
+
+li:hover {
+  cursor: pointer;
+}
+
+#workspace {
+  width: 600px;
+  min-height: 400px;
+  border: 1px solid black;
+  display: flex;
+  flex-flow: row;
+}
+
+#chosenleads {
+  width: 200px;
+  border-right: 1px solid black;
+}
+
+#chosencourses {
+  width: 200px;
+  border-right: 1px solid black;
+}
+
+#workspacegrid {
+  margin: 10px;
+}
+
+#workspacegrid td.column1 {
+  width: 120px;
+  height: 40px;
+  border: 1px solid black;
+}
+
+.removelh:hover {
+  cursor: pointer;
+}
+
+.removeco:hover {
+  cursor: pointer;
+}
+
+#comptable td {
+  padding-right: 5px;
+  min-height: 20px;
+}

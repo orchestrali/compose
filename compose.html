@@ -1,0 +1,105 @@
+<!-- This is a static file -->
+<!-- served from your routes in server.js -->
+
+<!-- You might want to try something fancier: -->
+<!-- html/nunjucks docs: https://mozilla.github.io/nunjucks/ -->
+<!-- pug: https://pugjs.org/ -->
+<!-- haml: http://haml.info/ -->
+<!-- hbs(handlebars): http://handlebarsjs.com/ -->
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Bell composer</title>
+    <meta name="description" content="A cool thing made with Glitch">
+    <link id="favicon" rel="icon" href="https://glitch.com/edit/favicon-app.ico" type="image/x-icon">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/compose.css">
+  </head>
+  <body>
+    <header>
+      <h1>
+        Composing Tool
+      </h1>
+    </header>
+
+    <main>
+      <form action="/" id="form" name="form" method="get">
+        <div class="input">
+          <label for="complibid">
+            Enter a complib.org method ID:
+          </label>
+          <input type="number" id="complibid" name="complibid" />
+          
+        </div>
+        
+        <button type="button" id="submit" >Submit</button>
+      </form>
+      <h2>
+        
+      </h2>
+      <h3>
+        Coursing orders
+      </h3>
+      <div id="sourcematerial">
+        <div id="courseorders">
+          
+        </div>
+        <div id="leadheads">
+          
+        </div>
+        <div id="leadinfo">
+          
+        </div>
+      </div>
+      <button id="addtoworkspace" class="disabled">
+        Add leadhead
+      </button>
+      <h3>
+        Workspace
+      </h3>
+      <p id="numberadded">
+        
+      </p>
+      <div id="workspace">
+        <div id="chosenleads">
+          <ul>
+            
+          </ul>
+        </div>
+        <div id="workinglist">
+          <table id="workspacegrid">
+            
+          </table>
+        </div>
+        
+      </div>
+      
+      
+      
+      <div id="composition">
+        <div class="column" >
+          <ul id="rowcolumn">
+            
+          </ul>
+        </div>
+        <div class="column" >
+          <ul id="catcolumn">
+            
+          </ul>
+        </div>
+      </div>
+      
+    </main>
+
+    
+
+    <!-- Your web-app is https, so your scripts need to be too -->
+    <script src="https://code.jquery.com/jquery-2.2.1.min.js"
+            integrity="sha256-gvQgAFzTH6trSrAWoH1iPo9Xc96QxSZ3feW6kem+O00="
+            crossorigin="anonymous"></script>
+    <script src="/compose.js"></script>
+  </body>
+</html>
