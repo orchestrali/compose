@@ -1,4 +1,5 @@
 var url = "https://api.complib.org/";
+var svg;
 var rowarr = [];
 var arr2 = [];
 var stage;
@@ -16,6 +17,10 @@ var gridtarget;
 
 
 $(function() {
+  $("#composition").svg({onLoad: (o) => {
+    svg = o;
+    svg.configure({xmlns: "http://www.w3.org/2000/svg", "xmlns:xlink": "http://www.w3.org/1999/xlink", width: 0, height: 0});
+  }});
   $("#submit").on("click", subcomplib);
   $("#courseorders").on("click", "li", courseorderclick);
   $("#leadheads").on("click", "li", leadheadclick);
