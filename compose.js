@@ -1,14 +1,21 @@
+const places = "1234567890ET";
+//complib api url for getting methods
 var url = "https://api.complib.org/";
+//holder for svg stuff
 var svg;
+//holder of plain course
 var rowarr = [];
 var arr2 = [];
+//stage of method from complib
 var stage;
 var numbells;
 var tenor;
+
+//store info: leadlength, leadhead, leadend, pborder, fcourses
 var methodinfo = {};
+//compinfo.courses, compinfo.leads - both indexes of things in use and/or false
 var compinfo = {};
 var courseorders;
-var places = "1234567890ET";
 var selectedlh;
 var activelh;
 var nextavailable;
@@ -32,8 +39,9 @@ $(function() {
   $("#workspacegrid").on("click", ".removelh", removelhclick);
 });
 
-
+//submit a complib method id
 function subcomplib() {
+  //clear previous stuff
   $("#rowcolumn,#catcolumn,#courseorders,#chosenleads ul").contents().detach();
   $("h2,#numberadded").text("");
   methodinfo = {};
@@ -45,6 +53,17 @@ function subcomplib() {
   }
 }
 
+//results of complib method rows
+let example = {
+  id: Number,
+  library: ["CCCBR", "Provisional"],
+  title: "method title",
+  name: "method name",
+  placeNotation: "supposedly in a cccbr format",
+  stage: Number,
+  divisionEnds: [Number],
+  rows: [["row", "spoken call", "row analysis flags"]]
+};
 function getcomplib(compid) {
   var xhr = new XMLHttpRequest();
   
@@ -63,7 +82,7 @@ function getcomplib(compid) {
       for (let i = 2; i < results.rows.length; i++) {
         let row = results.rows[i][0].split("").map(bellnum);
         rowarr.push(row);
-        if (!methodinfo.leadlength && results.rows[i][2] === "16") {
+        if (!methodinfo.leadlength && checkbit(results.rows[i][2],4)) {
           methodinfo.leadlength = i-1;
           regular = plainlhs.includes(results.rows[i][0]);
           methodinfo.leadhead = rowstring(row);
@@ -90,6 +109,16 @@ function getcomplib(compid) {
     }
   }
 }
+
+//complib provides rows with a number representing 16 flags (only it's not a number, it's a string!!!!)
+//check if a particular flag is set
+function checkbit(value, bit) {
+  let num = Number(value);
+  let pow = Math.pow(2, bit);
+  let d = Math.floor(num/pow);
+  return d % 2 === 1;
+}
+
 
 function setuptools() {
   let cos = stage === 6 ? courseorders : courseorders.filter(o => o.incourse === true && o.tentogether === true);
