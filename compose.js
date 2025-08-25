@@ -23,11 +23,13 @@ var selectedlh;
 var activelh;
 //leadheads that can come directly after activelh
 var nextavailable;
+
 var calltype = "near";
 //table cell being hovered over that could receive the current activelh
 //hmmm could I just highlight these for touchscreens
 var gridtarget;
-
+// plain, bob, or single, if activelh goes into gridtarget
+var connection;
 
 $(function() {
   $("#composition").svg({onLoad: (o) => {
@@ -41,9 +43,9 @@ $(function() {
   $("#addtoworkspace").on("click", addtoworkspace);
   //workspace
   $("#chosenleads").on("click", "li", worklhclick);
-  $("#workspacegrid").on("mouseenter", "td", worktablehover);
-  $("#workspacegrid").on("mouseleave", "td", worktableleave);
-  $("#workspacegrid").on("click", "td", worktableclick);
+  $("#workspacegrid").on("mouseenter", "td.column1", worktablehover);
+  $("#workspacegrid").on("mouseleave", "td.column1", worktableleave);
+  $("#workspacegrid").on("click", "td.column1", worktableclick);
   $("#workspacegrid").on("click", ".removelh", removelhclick);
 });
 
@@ -169,15 +171,16 @@ function setuptools() {
   $("#addrows").on("click", addrows);
 }
 
+//create threecolumns
 function addrows(e) {
   //console.log("add rows click");
   let r = $("#workspacegrid tr").length+1;
   let trow = `<tr>`;
   let tr = `<tr id="r${r}">`;
   let clas = ["callcol","cocol","numcol"];
-  for (let c = 1; c <= 3; c++) {
+  for (let c = 0; c <= 2; c++) {
     let cl = c === 1 ? ` class="column1"` : "";
-    if (c <= 2) trow += `<td id="r${r}c${c}"${cl}></td>`;
+    trow += `<td id="r${r}c${c}"${cl}></td>`;
     tr += `<td class="${clas[c-1]}"></td>`;
   }
   trow += `</tr>`;
@@ -190,6 +193,8 @@ function tablerelease(e) {
   console.log(e.currentTarget.id);
 }
 
+//have to hover before click - hmmm problem for touchscreens
+//add activelh to composition table
 function worktableclick(e) {
   if (gridtarget === e.currentTarget.id) {
     let id = gridtarget.slice(0,-1) + "2";
@@ -197,16 +202,20 @@ function worktableclick(e) {
     $("#"+id).addClass("removelh");
     $(e.currentTarget).text(activelh);
     $(e.currentTarget).css("background-color", "white");
+    if (connection != "plain") {
+      let cid = id.slice(0,-1) + "0";
+      let text = connection[0] === "b" ? "-" : "s";
+      $("#"+cid).text(text);
+    }
   }
 }
 
 function removelhclick(e) {
-  $(e.currentTarget).text("");
   $(e.currentTarget).removeClass("removelh");
-  let id = e.currentTarget.id.slice(0,-1) + "1";
-  $("#"+id).text("");
+  $(e.currentTarget).parent().children().text("");
 }
 
+//threecolumns because column numbers?? maybe I won't change them
 function worktablehover(e) {
   //if a workspace lh is selected and the table cell is blank
   if (activelh && $(e.currentTarget).text().length === 0) {
@@ -216,15 +225,18 @@ function worktablehover(e) {
     let after;
     if (trow === 1) {
       before = true;
+      connection = "plain";
     } else {
       let prev = ["#","r",trow-1,"c1"].join("");
       if ($(prev).text().length === 0) {
         before = true;
+        connection = "plain";
       } else {
         let blh = $(prev).text().split("").map(bellnum);
         let next = nextleads(blh);
         console.log(next);
-        if (Object.keys(next).find(key => rowstring(next[key]) === activelh)) {
+        connection = Object.keys(next).find(key => rowstring(next[key]) === activelh);
+        if (connection) {
           before = true;
         }
       }
@@ -239,12 +251,14 @@ function worktablehover(e) {
       $(e.currentTarget).css({cursor: "pointer", "background-color": "lightblue"});
     } else {
       gridtarget = null;
+      connection = null;
     }
     
   }
 }
 function worktableleave(e) {
   gridtarget = null;
+  connection = null;
   $(e.currentTarget).css("background-color", "white");
 }
 
