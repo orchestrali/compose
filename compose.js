@@ -15,11 +15,17 @@ var tenor;
 var methodinfo = {};
 //compinfo.courses, compinfo.leads - both indexes of things in use and/or false
 var compinfo = {};
+//holder of all the course orders for the stage
 var courseorders;
+//leadhead in source material that has been clicked on
 var selectedlh;
+//leadhead in workspace that has been clicked on
 var activelh;
+//leadheads that can come directly after activelh
 var nextavailable;
 var calltype = "near";
+//table cell being hovered over that could receive the current activelh
+//hmmm could I just highlight these for touchscreens
 var gridtarget;
 
 
@@ -29,9 +35,11 @@ $(function() {
     svg.configure({xmlns: "http://www.w3.org/2000/svg", "xmlns:xlink": "http://www.w3.org/1999/xlink", width: 0, height: 0});
   }});
   $("#submit").on("click", subcomplib);
+  //source material
   $("#courseorders").on("click", "li", courseorderclick);
   $("#leadheads").on("click", "li", leadheadclick);
   $("#addtoworkspace").on("click", addtoworkspace);
+  //workspace
   $("#chosenleads").on("click", "li", worklhclick);
   $("#workspacegrid").on("mouseenter", "td", worktablehover);
   $("#workspacegrid").on("mouseleave", "td", worktableleave);
@@ -143,6 +151,7 @@ function setuptools() {
     let costr = rowstring(co.co);
     let c = "";
     if (compinfo.courses[costr]) {
+      //should only result in class="false"
       c = ` class="${compinfo.courses[costr].join(" ")}"`;
     }
     html += `<li${c} id="c${costr}">${costr}</li>
@@ -153,14 +162,8 @@ function setuptools() {
   let rounds = places.slice(0,stage);
   $("#chosenleads ul").append(`<li id="al${rounds}">${rowstring(cos[0].co)}: ${rounds}</li>`);
   $("#numberadded").text(methodinfo.leadlength + " rows");
-  for (let r = 1; r <= 8; r++) {
-    let trow = `<tr>`;
-    for (let c = 1; c <= 2; c++) {
-      let cl = c === 1 ? ` class="column1"` : "";
-      trow += `<td id="r${r}c${c}"${cl}></td>`;
-    }
-    trow += `</tr>`;
-    $("#workspacegrid").append(trow);
+  for (let r = 1; r <= 16; r++) {
+    addrows();
   }
   $("#workinglist").append(`<button id="addrows">+</button>`);
   $("#addrows").on("click", addrows);
@@ -180,7 +183,7 @@ function addrows(e) {
   trow += `</tr>`;
   tr += `</tr>`;
   $("#workspacegrid").append(trow);
-  $("#comptable").append(tr);
+  //$("#comptable").append(tr);
 }
 
 function tablerelease(e) {
@@ -205,7 +208,9 @@ function removelhclick(e) {
 }
 
 function worktablehover(e) {
+  //if a workspace lh is selected and the table cell is blank
   if (activelh && $(e.currentTarget).text().length === 0) {
+    //figure out if activelh can connect to surrounding cells
     let trow = Number(e.currentTarget.id.slice(1,-2));
     let before;
     let after;
@@ -228,6 +233,7 @@ function worktablehover(e) {
     if (!$(below) || $(below).text().length === 0 || nextavailable.includes($(below).text())) {
       after = true;
     }
+    //if the composition would work, shade the table cell
     if (before && after) {
       gridtarget = e.currentTarget.id;
       $(e.currentTarget).css({cursor: "pointer", "background-color": "lightblue"});
@@ -499,17 +505,19 @@ function getfalsefromlead(lh) {
   return results;
 }
 
+//in source material
+//display the leadheads in that course order
 function courseorderclick(e) {
   selectedlh = null;
   $("#addtoworkspace").addClass("disabled");
   $("#courseorders li.selected").removeClass("selected");
-  $("#leadheads li.selected").removeClass("selected");
   $(e.currentTarget).addClass("selected");
   $("#leadheads").contents().detach();
   let costr = $(e.currentTarget).text();
   let co = costr.split("").map(bellnum);
   let homestr = rowstring(homecourseorder(stage));
   let leads = [];
+  //might be easier not to do this one differently???
   if (costr === homestr) {
     let plain = plainleadheads(stage);
     leads.push(places.slice(0,stage).split("").map(bellnum));
@@ -540,6 +548,7 @@ function courseorderclick(e) {
   $("#leadheads").append(html);
 }
 
+//in source material
 function leadheadclick(e) {
   if (!$(e.currentTarget).hasClass("inuse")) {
     $("#addtoworkspace").removeClass("disabled");
@@ -549,12 +558,14 @@ function leadheadclick(e) {
   selectedlh = $(e.currentTarget).text();
 }
 
+//add selectedlh (from source material) to workspace
 function addtoworkspace(e) {
   if (!$(e.currentTarget).hasClass("disabled")) {
     $(e.currentTarget).addClass("disabled");
     let lh = selectedlh.split("").map(bellnum);
     let co = getcofromlh(lh);
     let costr = rowstring(co);
+    //update compinfo and classes in source material
     if (!compinfo.courses[costr]) {
       compinfo.courses[costr] = ["inuse"];
       $("#c"+costr).addClass("inuse");
@@ -566,9 +577,11 @@ function addtoworkspace(e) {
       compinfo.leads[selectedlh] = ["inuse"];
       $("#l"+selectedlh).addClass("inuse");
     }
+    //actually add to workspace
     $("#chosenleads ul").append(`<li id="al${selectedlh}">${costr}: ${selectedlh}</li>`);
     let num = $("#chosenleads li").length * methodinfo.leadlength;
     $("#numberadded").text(`${num} rows`);
+    //update falseness in compinfo and source material display
     let fleads = getfalsefromlead(lh);
     //console.log(fleads);
     fleads.forEach(o => {
@@ -593,6 +606,7 @@ function addtoworkspace(e) {
 }
 
 //lh as array
+//given a leadhead, build the options for the next leadhead
 function nextleads(lh) {
   let next = {};
   let tenorplace = lh.indexOf(stage)+1;
@@ -614,6 +628,7 @@ function nextleads(lh) {
   return next;
 }
 
+//building far calls but not using them yet
 function buildcallpns(n) {
   let calls = {
     b14: [1,4],
@@ -627,6 +642,8 @@ function buildcallpns(n) {
   return calls;
 }
 
+//given a row and a change, apply the change
+//row could be array or string, but since the result is an array array would be better
 function applypn(row, pn) {
   let next = [];
   let dir = 1;
@@ -641,20 +658,24 @@ function applypn(row, pn) {
   return next;
 }
 
+//click on a leadhead in the workspace (not in table)
 function worklhclick(e) {
   $("#chosenleads li.selected").removeClass("selected");
   $("li.close").removeClass("close");
   $(e.currentTarget).addClass("selected");
   activelh = e.currentTarget.id.slice(2);
+  //figure out leadheads that can come next
   let next = nextleads(activelh.split("").map(bellnum));
   nextavailable = [];
   ["plain", "b14"].forEach(key => {
     nextavailable.push(rowstring(next[key]));
   });
+  //singles only allowed on minor (currently)
   if (stage === 6) {
     let key = calltype === "near" ? "s1234" : "s1456";
     nextavailable.push(rowstring(next[key]));
   }
+  //highlight next in workspace and source course orders
   nextavailable.forEach(r => {
     if ($("#al"+r).length) {
       $("#al"+r).addClass("close");
