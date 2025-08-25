@@ -564,6 +564,7 @@ function courseorderclick(e) {
 
 //in source material
 function leadheadclick(e) {
+  console.log(e.shiftKey);
   if (!$(e.currentTarget).hasClass("inuse")) {
     $("#addtoworkspace").removeClass("disabled");
   }
@@ -694,6 +695,7 @@ function worklhclick(e) {
     if ($("#al"+r).length) {
       $("#al"+r).addClass("close");
     } else {
+      if ($("#l"+r).length) $("#l"+r).addClass("close");
       let co = getcofromlh(r.split("").map(bellnum));
       //console.log(co);
       let costr = rowstring(co);
