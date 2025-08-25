@@ -64,10 +64,10 @@ let example = {
   divisionEnds: [Number],
   rows: [["row", "spoken call", "row analysis flags"]]
 };
-function getcomplib(compid) {
+function getcomplib(mid) {
   var xhr = new XMLHttpRequest();
   
-  xhr.open('GET', url+"method/"+compid+"/rows", true);
+  xhr.open('GET', url+"method/"+mid+"/rows", true);
   xhr.send();
   
   xhr.onload = function() {
@@ -76,13 +76,15 @@ function getcomplib(compid) {
     
     if (results.rows) {
       stage = results.stage;
+      //build set of plain bob leadheads for the stage
       let plainlhs = plainleadheads(stage).map(a => rowstring(a));
       let regular;
-      
+      //add each row to rowarr (not including rowzero)
       for (let i = 2; i < results.rows.length; i++) {
         let row = results.rows[i][0].split("").map(bellnum);
         rowarr.push(row);
         if (!methodinfo.leadlength && checkbit(results.rows[i][2],4)) {
+          //at the first row that has the leadhead flag set, get this info
           methodinfo.leadlength = i-1;
           regular = plainlhs.includes(results.rows[i][0]);
           methodinfo.leadhead = rowstring(row);
@@ -119,7 +121,8 @@ function checkbit(value, bit) {
   return d % 2 === 1;
 }
 
-
+//mark starting course order as in use and find courses false against it
+//add course orders to display
 function setuptools() {
   let cos = stage === 6 ? courseorders : courseorders.filter(o => o.incourse === true && o.tentogether === true);
   console.log(cos[0]);
@@ -307,6 +310,7 @@ function buildcourse(co) {
   return course;
 }
 
+//build plain bob leadheads for stage n
 function plainleadheads(n) {
   let lhs = [];
   let co = homecourseorder(n);
@@ -324,12 +328,16 @@ function plainleadheads(n) {
   return lhs;
 }
 
+//compare rows of course against rowarr
 function comparecourse(course) {
+  //build index, key is row from rowarr, value is row number in rowarr
   let dex = {};
   for (let i = 0; i < rowarr.length; i++) {
     let str = rowstring(rowarr[i]);
     dex[str] = i+1;
   }
+  //check if each row of course is in dex
+  //dice has arrays with two numbers: index of a row in rowarr, index of same row in course
   let dice = [];
   for (let i = 0; i < course.length; i++) {
     let str = rowstring(course[i]);
@@ -341,6 +349,7 @@ function comparecourse(course) {
   return dice;
 }
 
+//specifically false against the plain course
 function findfalse() {
   //for each course order
   //build the course
