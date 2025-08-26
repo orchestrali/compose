@@ -523,6 +523,7 @@ function buildcourse(co) {
 }
 
 //build plain bob leadheads for stage n
+//does not include rounds??
 function plainleadheads(n) {
   let lhs = [];
   let co = homecourseorder(n);
@@ -564,33 +565,44 @@ function comparecourse(course) {
 //find bits false against the plain course
 function findfalsefast() {
   //assuming treble is hunt bell
-  let lhstrings = [places.slice(0,stage)];
+  //assuming palindromic??? not currently
+  let plainlhs = plainleadheads(stage).map(a => rowstring(a));
+  plainlhs.push(places.slice(0,stage));
+  let lhstrings = [];
   let lhs = [];
   let trebleplaces = [];
-  for (let i = 0; i < methodinfo.leadlength; i++) {
+  for (let i = 0; i < rowarr.length; i++) {
     let r = rowarr[i];
-    let tp = r.indexOf(1);
-    if (!trebleplaces.includes(tp)) {
-      let aa = getlhsfromrow(rowarr[i]);
-      aa.forEach(a => {
-        let s = rowstring(a);
-        if (!lhstrings.includes(s)) {
-          lhstrings.push(s);
-          lhs.push(a);
-        }
-      });
-      trebleplaces.push(tp);
-    }
+    let aa = getlhsfromrow(rowarr[i]);
+    let plaincount = 0;
+    aa.forEach(a => {
+      let s = rowstring(a);
+      if (plainlhs.includes(s)) {
+        plaincount++;
+      } else if (!lhstrings.includes(s)) {
+        lhstrings.push(s);
+        lhs.push(a);
+      }
+    });
+    if (plaincount > 1) console.log("false plain course???");
   }
   let cc = [];
+  let otherc = [];
   let cstrings = [];
   lhs.forEach(lh => {
     let c = getcofromlh(lh);
-    if (!cstrings.includes(rowstring(c))) {
+    let cs = rowstring(c);
+    if (!cstrings.includes(cs)) {
+      let o = courseorders.find(obj => rowstring(obj.co) === cs);
       cstrings.push(rowstring(c));
-      cc.push(c);
+      if (o.incourse && o.tentogether) {
+        cc.push(c);
+      } else {
+        otherc.push(c);
+      }
     }
   });
+  console.log(otherc.length + " other course orders");
   return buildfalse(cc);
 }
 
@@ -643,7 +655,7 @@ function buildfalse(cos) {
       if (o && (!o.incourse || !o.tentogether)) extra++;
     }
   }
-  console.log(extra);
+  //console.log(extra);
   return fcourses;
 }
 
