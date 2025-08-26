@@ -53,6 +53,7 @@ $(function() {
   $("#workspacegrid").on("mouseleave", "td.column1", worktableleave);
   $("#workspacegrid").on("click", "td.column1", worktableclick);
   $("#workspacegrid").on("click", ".removelh", removelhclick);
+  $("#searchbutton").on("click", handlesearchbar);
 });
 
 //submit a complib method id
@@ -176,6 +177,7 @@ function setuptools() {
   }
   $("#workinglist").append(`<button id="addrows">+</button>`);
   $("#addrows").on("click", addrows);
+  $("#searchbar").removeClass("hidden");
 }
 
 //add empty rows to worktable
