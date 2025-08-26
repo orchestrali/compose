@@ -17,6 +17,8 @@ var methodinfo = {};
 var compinfo = {};
 //holder of all the course orders for the stage
 var courseorders;
+//course order in source material that has been clicked on
+var selectedco;
 //leadhead in source material that has been clicked on - attempting not to use this anymore
 var selectedlh;
 //clicked leadheads in source material
@@ -25,6 +27,8 @@ var lhstoadd = [];
 var activelh;
 //leadheads that can come directly after activelh
 var nextavailable;
+//results from row search field
+var searchresults = {};
 
 var calltype = "near";
 //table cell being hovered over that could receive the current activelh
@@ -115,9 +119,9 @@ function getcomplib(mid) {
           courseorders = body;
           //console.log(courseorders.length);
           //console.log(courseorders[0]);
-          methodinfo.fcourses = findfalse();
-          console.log(methodinfo.fcourses);
-          console.log(findfalseagain());
+          methodinfo.fcourses = findfalseagain();
+          //console.log(methodinfo.fcourses);
+          //console.log(findfalseagain());
           setuptools();
         });
       }
@@ -277,6 +281,7 @@ function courseorderclick(e) {
   $(e.currentTarget).addClass("selected");
   $("#leadheads").contents().detach();
   let costr = $(e.currentTarget).text();
+  selectedco = costr;
   let co = costr.split("").map(bellnum);
   let homestr = rowstring(homecourseorder(stage));
   let leads = [];
@@ -300,6 +305,9 @@ function courseorderclick(e) {
     if (nextavailable && nextavailable.includes(s)) {
       cl.push("close");
     }
+    if (searchresults[costr] && searchresults[costr][s]) {
+      cl.push("hasrow");
+    }
     if (compinfo.leads[s]) {
       cl.push(...compinfo.leads[s]);
     }
@@ -315,9 +323,10 @@ function courseorderclick(e) {
 function leadheadclick(e) {
   //console.log(e.shiftKey);
   document.getSelection().removeAllRanges();
+  let lh = $(e.currentTarget).text();
+  $("#leadinfo").children().remove();
   if (!$(e.currentTarget).hasClass("inuse")) {
     $("#addtoworkspace").removeClass("disabled");
-    let lh = $(e.currentTarget).text();
     if (e.shiftKey) {
       if (!lhstoadd.includes(lh)) lhstoadd.push(lh);
     } else {
@@ -326,7 +335,10 @@ function leadheadclick(e) {
     }
     $(e.currentTarget).addClass("selected");
   }
-  
+  if ($(e.currentTarget).hasClass("hasrow")) {
+    let rows = searchresults[selectedco][lh];
+    displaysearch(rows);
+  }
   
 }
 
@@ -381,6 +393,7 @@ function addtoworkspace(e) {
 
 //click on a leadhead in the workspace (not in table)
 function worklhclick(e) {
+  clearsearch();
   $("#chosenleads li.selected").removeClass("selected");
   $("li.close").removeClass("close");
   $(e.currentTarget).addClass("selected");
@@ -422,10 +435,16 @@ function clearworkselection() {
   $("#sourcematerial li.close").removeClass("close");
 }
 
+function clearsearch() {
+  searchresults = {};
+  $("li.hasrow").removeClass("hasrow");
+  $("#leadinfo").children().remove();
+}
+
 //idea: allow searching for a string shorter than the stage? flexible location in row
 function handlesearchbar(e) {
   clearworkselection();
-  $("li.hasrow").removeClass("hasrow");
+  clearsearch();
   $("#searchbar p").remove();
   let text = $("#search").val();
   let problem;
@@ -443,12 +462,68 @@ function handlesearchbar(e) {
   if (problem) {
     $("#searchbar").append(`<p>${problem}</p>`);
   } else {
-    let count = 0;
+    let cocount = 0;
+    let rowcount = 0;
+    let res = {};
     patterns.forEach(p => {
       let rows = getrowsfrompattern(p);
       //need to get lhs and cos from each row
+      rows.forEach(r => {
+        let set = getbothfromrow(r);
+        for (let lh in set) {
+          let co = set[lh];
+          
+          if (res[co]) {
+            if (res[co][lh]) {
+              res[co][lh].push(rowstring(r));
+            } else {
+              res[co][lh] = [rowstring(r)];
+            }
+          } else {
+            res[co] = {};
+            res[co][lh] = [rowstring(r)];
+          }
+        }
+      });
     });
+
+    for (let co in res) {
+      let found = $("#c"+co).length;
+      if (found) {
+        searchresults[co] = res[co];
+        cocount++;
+        for (let lh in res[co]) {
+          rowcount += res[co][lh].length;
+          if ($("#al"+lh).length) {
+            $("#al"+lh).addClass("hasrow");
+          }
+          if ($("#l"+lh).length) $("#l"+lh).addClass("hasrow");
+          $("li#c"+co).addClass("hasrow");
+          if (lhstoadd.length === 1 && lhstoadd.includes(lh)) {
+            displaysearch(res[co][lh]);
+          }
+        }
+      }
+    }
+    if (cocount === 0) {
+      $("#searchbar").append(`<p>row not available</p>`);
+    }
+    console.log("rows available: "+rowcount);
   }
+}
+
+//given some rows, display them in the source material info section
+//I want the rows to be strings
+function displaysearch(rows) {
+  let html = `<p>Rows matching search in this lead:</p>
+  <ul>
+  `;
+  rows.forEach(r => {
+    html += `<li>${r}</li>
+    `;
+  });
+  html += `</ul>`;
+  $("#leadinfo").append(html);
 }
 
 //BELLRINGING FUNCTIONS
@@ -592,55 +667,14 @@ function findfalseagain() {
     });
     if (plaincount > 1) console.log("falseness in plain course??");
   }
-  console.log(otherc);
+  //console.log(otherc);
   let sum = 0;
   otherc.forEach(o => sum += o.count);
-  console.log(sum + " rows in otherc");
+  //console.log(sum + " rows in otherc");
   return buildfalse(cc);
 }
 
-//find bits false against the plain course
-function findfalsefast() {
-  //assuming treble is hunt bell
-  //assuming palindromic??? not currently
-  let plainlhs = plainleadheads(stage).map(a => rowstring(a));
-  plainlhs.push(places.slice(0,stage));
-  let lhstrings = [];
-  let lhs = [];
-  for (let i = 0; i < rowarr.length; i++) {
-    let r = rowarr[i];
-    let aa = getlhsfromrow(rowarr[i]);
-    let plaincount = 0;
-    aa.forEach(a => {
-      let s = rowstring(a);
-      if (plainlhs.includes(s)) {
-        plaincount++;
-      } else if (!lhstrings.includes(s)) {
-        lhstrings.push(s);
-        lhs.push(a);
-      }
-    });
-    if (plaincount > 1) console.log("false plain course???");
-  }
-  let cc = [];
-  let otherc = [];
-  let cstrings = [];
-  lhs.forEach(lh => {
-    let c = getcofromlh(lh);
-    let cs = rowstring(c);
-    if (!cstrings.includes(cs)) {
-      let o = courseorders.find(obj => rowstring(obj.co) === cs);
-      cstrings.push(rowstring(c));
-      if (o.incourse && o.tentogether) {
-        cc.push(c);
-      } else {
-        otherc.push(c);
-      }
-    }
-  });
-  console.log(otherc.length + " other course orders");
-  return buildfalse(cc);
-}
+
 
 //let's say r is an array
 function getlhsfromrow(r) {
@@ -657,6 +691,19 @@ function getlhsfromrow(r) {
     }
   }
   return lhs;
+}
+
+//co and lh
+//row r is array
+//return obj with lh keys and co values
+function getbothfromrow(r) {
+  let lhs = getlhsfromrow(r);
+  let res = {};
+  lhs.forEach(a => {
+    let co = getcofromlh(a);
+    res[rowstring(a)] = rowstring(co);
+  });
+  return res;
 }
 
 
