@@ -276,49 +276,52 @@ function worktableleave(e) {
 //in source material
 //display the leadheads in that course order
 function courseorderclick(e) {
-  selectedlh = null;
-  lhstoadd = [];
-  $("#addtoworkspace").addClass("disabled");
-  $("#courseorders li.selected").removeClass("selected");
-  $(e.currentTarget).addClass("selected");
-  $("#leadheads").contents().detach();
-  let costr = $(e.currentTarget).text();
-  selectedco = costr;
-  let co = costr.split("").map(bellnum);
-  let homestr = rowstring(homecourseorder(stage));
-  let leads = [];
-  //might be easier not to do this one differently???
-  if (costr === homestr) {
-    let plain = plainleadheads(stage);
-    leads.push(places.slice(0,stage).split("").map(bellnum));
-    let pb = methodinfo.pborder;
-    for (let i = 1; i < pb.length; i++) {
-      let lead = plain.find(l => l.indexOf(stage)+1 === pb[i]);
-      leads.push(lead);
+  if (!$(e.currentTarget).hasClass("selected")) {
+    selectedlh = null;
+    lhstoadd = [];
+    $("#leadinfo").children().remove();
+    $("#addtoworkspace").addClass("disabled");
+    $("#courseorders li.selected").removeClass("selected");
+    $(e.currentTarget).addClass("selected");
+    $("#leadheads").contents().detach();
+    let costr = $(e.currentTarget).text();
+    selectedco = costr;
+    let co = costr.split("").map(bellnum);
+    let homestr = rowstring(homecourseorder(stage));
+    let leads = [];
+    //might be easier not to do this one differently???
+    if (costr === homestr) {
+      let plain = plainleadheads(stage);
+      leads.push(places.slice(0,stage).split("").map(bellnum));
+      let pb = methodinfo.pborder;
+      for (let i = 1; i < pb.length; i++) {
+        let lead = plain.find(l => l.indexOf(stage)+1 === pb[i]);
+        leads.push(lead);
+      }
+    } else {
+      leads = getlhsfromco(co);
     }
-  } else {
-    leads = getlhsfromco(co);
-  }
-  let html = `<ul>
-  `;
-  leads.forEach(l => {
-    let s = rowstring(l);
-    let cl = [];
-    if (nextavailable && nextavailable.includes(s)) {
-      cl.push("close");
-    }
-    if (searchresults[costr] && searchresults[costr][s]) {
-      cl.push("hasrow");
-    }
-    if (compinfo.leads[s]) {
-      cl.push(...compinfo.leads[s]);
-    }
-    let c = cl.length ? ` class="${cl.join(" ")}"` : "";
-    html += `<li${c} id="l${s}">${s}</li>
+    let html = `<ul>
     `;
-  });
-  html += `</ul>`;
-  $("#leadheads").append(html);
+    leads.forEach(l => {
+      let s = rowstring(l);
+      let cl = [];
+      if (nextavailable && nextavailable.includes(s)) {
+        cl.push("close");
+      }
+      if (searchresults[costr] && searchresults[costr][s]) {
+        cl.push("hasrow");
+      }
+      if (compinfo.leads[s]) {
+        cl.push(...compinfo.leads[s]);
+      }
+      let c = cl.length ? ` class="${cl.join(" ")}"` : "";
+      html += `<li${c} id="l${s}">${s}</li>
+      `;
+    });
+    html += `</ul>`;
+    $("#leadheads").append(html);
+  }
 }
 
 //in source material
