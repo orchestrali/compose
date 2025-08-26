@@ -567,7 +567,8 @@ function courseorderclick(e) {
 
 //in source material
 function leadheadclick(e) {
-  console.log(e.shiftKey);
+  //console.log(e.shiftKey);
+  document.getSelection().removeAllRanges();
   if (!$(e.currentTarget).hasClass("inuse")) {
     $("#addtoworkspace").removeClass("disabled");
     let lh = $(e.currentTarget).text();
