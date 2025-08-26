@@ -947,6 +947,39 @@ function buildcallpns(n) {
   return calls;
 }
 
+var callpos = {5: "V", 6: "X", 7: "S", 8: "E", 9: "N"};
+//lh will need to be array of numbers
+function getcallname(lh, call) {
+  let p = lh.indexOf(stage)+1;
+  let name = call === "s" ? "s" : "";
+  switch (p) {
+    case stage:
+      name += "H";
+      break;
+    case 2:
+      //needs updating for far calls????
+      name += call === "s" ? "B" : "I";
+      break;
+    case 3:
+      //needs updating for far calls????
+      name += call === "s" ? "T" : "B";
+      break;
+    case 4:
+      name += "F";
+      //might need to change for far calls??
+      break;
+    case stage-1:
+      name += stage%2 === 0 ? "W" : "M";
+      break;
+    case stage-2:
+      name += stage%2 === 0 ? "M" : "W";
+      break;
+    default:
+      name += callpos[p];
+  }
+  return name;
+}
+
 //given a row and a change, apply the change
 //row could be array or string, but since the result is an array array would be better
 function applypn(row, pn) {
