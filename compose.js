@@ -116,7 +116,8 @@ function getcomplib(mid) {
           //console.log(courseorders.length);
           //console.log(courseorders[0]);
           methodinfo.fcourses = findfalse();
-          //console.log(methodinfo.fcourses);
+          console.log(methodinfo.fcourses);
+          console.log(findfalsefast());
           setuptools();
         });
       }
@@ -173,7 +174,7 @@ function setuptools() {
   $("#addrows").on("click", addrows);
 }
 
-//create threecolumns
+//add empty rows to worktable
 function addrows(e) {
   //console.log("add rows click");
   let r = $("#workspacegrid tr").length+1;
@@ -190,12 +191,12 @@ function addrows(e) {
   $("#workspacegrid").append(trow);
   //$("#comptable").append(tr);
 }
-
+//no idea what this was for? testing?
 function tablerelease(e) {
   console.log(e.currentTarget.id);
 }
 
-//have to hover before click - hmmm problem for touchscreens
+//have to hover before click 
 //add activelh to composition table
 function worktableclick(e) {
   if (gridtarget === e.currentTarget.id) {
@@ -212,12 +213,13 @@ function worktableclick(e) {
   }
 }
 
+//remove a lh from worktable
 function removelhclick(e) {
   $(e.currentTarget).removeClass("removelh");
   $(e.currentTarget).parent().children().text("");
 }
 
-//threecolumns because column numbers?? maybe I won't change them
+//check if a lh can be added to a worktable cell
 function worktablehover(e) {
   //if a workspace lh is selected and the table cell is blank
   if (activelh && $(e.currentTarget).text().length === 0) {
@@ -264,262 +266,6 @@ function worktableleave(e) {
   $(e.currentTarget).css("background-color", "white");
 }
 
-//convert bell characters to numbers
-function bellnum(n) {
-  switch (n) {
-    case "0":
-      return 10;
-      break;
-    case "E":
-      return 11;
-      break;
-    case "T":
-      return 12;
-      break;
-    default:
-      return Number(n);
-  }
-}
-
-//convert array of bell numbers to string of characters
-function rowstring(arr) {
-  let r = arr.map(n => {
-    switch (n) {
-      case 10:
-        return "0";
-        break;
-      case 11:
-        return "E";
-        break;
-      case 12:
-        return "T";
-        break;
-      default:
-        return n;
-    }
-  });
-  return r.join("");
-}
-
-//does not include tenor
-function homecourseorder(stage) {
-  let home = [];
-  for (let b = 2; b < stage; b+=2) {
-    home.push(b);
-    home.unshift(b+1);
-  }
-  return home;
-}
-
-//co should be an array
-function buildcourse(co) {
-  let home = homecourseorder(stage);
-  let course = [];
-  for (let i = 0; i < rowarr.length; i++) {
-    let old = rowarr[i];
-    let row = [];
-    for (let p = 0; p < stage; p++) {
-      if ([1,stage].includes(old[p])) {
-        row.push(old[p])
-      } else {
-        let b = old[p];
-        let j = home.indexOf(b);
-        row.push(co[j]);
-      }
-    }
-    course.push(row);
-  }
-  return course;
-}
-
-//build plain bob leadheads for stage n
-function plainleadheads(n) {
-  let lhs = [];
-  let co = homecourseorder(n);
-  co.unshift(n);
-  for (let i = 0; i < n-2; i++) {
-    let row = [1];
-    for (let b = 2; b <= n; b++) {
-      let j = co.indexOf(b);
-      let k = j - i - 1;
-      if (k < 0) k = co.length + k;
-      row.push(co[k]);
-    }
-    lhs.push(row);
-  }
-  return lhs;
-}
-
-//compare rows of course against rowarr
-function comparecourse(course) {
-  //build index, key is row from rowarr, value is row number in rowarr
-  let dex = {};
-  for (let i = 0; i < rowarr.length; i++) {
-    let str = rowstring(rowarr[i]);
-    dex[str] = i+1;
-  }
-  //check if each row of course is in dex
-  //dice has arrays with two numbers: index of a row in rowarr, index of same row in course
-  let dice = [];
-  for (let i = 0; i < course.length; i++) {
-    let str = rowstring(course[i]);
-    let n = dex[str];
-    if (n) {
-      dice.push([n-1, i]);
-    }
-  }
-  return dice;
-}
-
-//specifically false against the plain course
-function findfalse() {
-  //for each course order
-  //build the course
-  //comparecourse(course)
-  let cos = stage === 6 ? courseorders : courseorders.filter(o => o.incourse === true && o.tentogether === true);
-  
-  let leadlength = methodinfo.leadlength;
-  //console.log("number of course orders to check: "+cos.length);
-  let fcourses = [];
-  for (let i = 1; i < cos.length; i++) {
-    let co = cos[i].co;
-    let course = buildcourse(co);
-    if (i === 0) {
-      //console.log(course);
-    }
-    let f = comparecourse(course);
-    if (f.length) {
-      let leads = [];
-      for (let j = 1; j < stage; j++) {
-        let rows = [];
-        let lh = j === 1 ? course[course.length-1] : course[j*leadlength-1];
-        f.forEach(a => {
-          let n = a[1];
-          if (n < j*leadlength && n > (j-1)*leadlength-1) {
-            rows.push(n-(j-1)*leadlength+1);
-          }
-        });
-        if (rows.length) {
-          leads.push({lh: rowstring(lh), rownums: rows});
-        }
-      }
-      fcourses.push({co: co, rownums: f, leads: leads});
-    }
-  }
-  return fcourses;
-  
-}
-
-//given a coursing order, find the courses that are false against it
-function getfalse(co) {
-  let fcos = [];
-  let home = homecourseorder(stage);
-  methodinfo.fcourses.forEach(o => {
-    let str = "";
-    for (let i = 0; i < co.length; i++) {
-      let n = o.co[i];
-      let j = home.indexOf(n);
-      str += co[j];
-    }
-    fcos.push(str);
-  });
-  return fcos;
-}
-
-//given a false course order, find its equivalent for the course order co
-//doesn't actually have to be false
-function getfalse2(fco, co) {
-  let eq = [];
-  let home = homecourseorder(co.length+1);
-  for (let i = 0; i < co.length; i++) {
-    let b = fco[i];
-    let j = home.indexOf(b);
-    eq.push(co[j]);
-  }
-  return eq;
-}
-
-//lh must be THE leadhead as an array of numbers
-function leadorder(lh) {
-  let order = [stage];
-  let i = lh.indexOf(stage);
-  do {
-    order.push(i+1);
-    i = lh.indexOf(i+1);
-  } while (i != stage-1);
-  methodinfo.pborder = order;
-}
-
-//lh as array
-function getcofromlh(lh) {
-  let home = homecourseorder(lh.length);
-  home.unshift(lh.length);
-  let co = [];
-  for (let i = 0; i < home.length; i++) {
-    co.push(lh[home[i]-1]);
-  }
-  let i = co.indexOf(lh.length);
-  let rot = co.slice(i+1);
-  if (i > 0) {
-    rot.push(...co.slice(0,i));
-  }
-  return rot;
-}
-
-
-function getlhsfromco(c) {
-  let plainco = [c.length+2].concat(homecourseorder(c.length+2));
-  let co = [c.length+2].concat(c);
-  
-  let plain = plainleadheads(co.length+1);
-  plain.unshift(places.slice(0,co.length+1).split("").map(bellnum));
-  //console.log(plain);
-  let pb = methodinfo.pborder;
-  let lhs = [];
-  for (let i = 0; i < pb.length; i++) {
-    let home = plain.find(a => a.indexOf(co.length+1)+1 === pb[i]);
-    let lh = [1];
-    for (let j = 1; j < home.length; j++) {
-      let b = home[j];
-      let k = plainco.indexOf(b);
-      lh.push(co[k]);
-    }
-    lhs.push(lh);
-  }
-  return lhs;
-}
-
-//lh needs to be an array
-function getfalsefromlead(lh) {
-  let leadco = getcofromlh(lh);
-  
-  let results = [];
-  let tenorplace = lh.indexOf(stage);
-  
-  for (let i = 0; i < methodinfo.fcourses.length; i++) {
-    let o = methodinfo.fcourses[i];
-    let co = getfalse2(o.co, leadco);
-    
-    let coleads = getlhsfromco(co);
-    
-    let leads = [];
-    for (let j = 0; j < o.leads.length; j++) {
-      let lo = o.leads[j];
-      let olh = lo.lh.split("").map(bellnum);
-      if (olh.indexOf(stage) === tenorplace) {
-        let lead = coleads.find(a => a[tenorplace] === stage);
-        leads.push(rowstring(lead));
-      }
-    }
-    leads.forEach(n => {
-      results.push({co: co, lh: n});
-    });
-    
-  }
-  //console.log("result of getfalsefromlead");
-    //console.log(results);
-  return results;
-}
 
 //in source material
 //display the leadheads in that course order
@@ -633,6 +379,399 @@ function addtoworkspace(e) {
   
 }
 
+//click on a leadhead in the workspace (not in table)
+function worklhclick(e) {
+  $("#chosenleads li.selected").removeClass("selected");
+  $("li.close").removeClass("close");
+  $(e.currentTarget).addClass("selected");
+  activelh = e.currentTarget.id.slice(2);
+  //figure out leadheads that can come next
+  let next = nextleads(activelh.split("").map(bellnum));
+  nextavailable = [];
+  ["plain", "b14"].forEach(key => {
+    nextavailable.push(rowstring(next[key]));
+  });
+  //singles only allowed on minor (currently)
+  if (stage === 6) {
+    let key = calltype === "near" ? "s1234" : "s1456";
+    nextavailable.push(rowstring(next[key]));
+  }
+  //highlight next in workspace and source course orders
+  nextavailable.forEach(r => {
+    if ($("#al"+r).length) {
+      $("#al"+r).addClass("close");
+    } else {
+      if ($("#l"+r).length) $("#l"+r).addClass("close");
+      let co = getcofromlh(r.split("").map(bellnum));
+      //console.log(co);
+      let costr = rowstring(co);
+      $("li#c"+costr).addClass("close");
+    }
+  });
+}
+
+function clearworkselection() {
+  activelh = null;
+  nextavailable = [];
+  gridtarget = null;
+  connection = null;
+  
+  ["selected", "close", "false"].forEach(c => {
+    $("#chosenleads li."+c).removeClass(c);
+  });
+  $("#sourcematerial li.close").removeClass("close");
+}
+
+//idea: allow searching for a string shorter than the stage? flexible location in row
+function handlesearchbar(e) {
+  clearworkselection();
+  $("li.hasrow").removeClass("hasrow");
+  $("#searchbar p").remove();
+  let text = $("#search").val();
+  let problem;
+  let patterns = [text];
+
+  if (text.length < stage) {
+    //currently invalid
+    problem = "search doesn't match stage";
+  } else if (/[^\dxet\(\)]/.test(text)) {
+    problem = "invalid character in search";
+  } else if (text.includes("(") || text.includes(")")) {
+    patterns = handlepatterns(text);
+    if (patterns.length === 0) problem = "problem with parentheses";
+  }
+  if (problem) {
+    $("#searchbar").append(`<p>${problem}</p>`);
+  } else {
+    let count = 0;
+    patterns.forEach(p => {
+      let rows = getrowsfrompattern(p);
+      //need to get lhs and cos from each row
+    });
+  }
+}
+
+//BELLRINGING FUNCTIONS
+
+//convert bell characters to numbers
+function bellnum(n) {
+  switch (n) {
+    case "0":
+      return 10;
+      break;
+    case "E":
+      return 11;
+      break;
+    case "T":
+      return 12;
+      break;
+    default:
+      return Number(n);
+  }
+}
+
+//convert array of bell numbers to string of characters
+function rowstring(arr) {
+  let r = arr.map(n => {
+    switch (n) {
+      case 10:
+        return "0";
+        break;
+      case 11:
+        return "E";
+        break;
+      case 12:
+        return "T";
+        break;
+      default:
+        return n;
+    }
+  });
+  return r.join("");
+}
+
+//build plain bob course order
+//does not include tenor
+function homecourseorder(stage) {
+  let home = [];
+  for (let b = 2; b < stage; b+=2) {
+    home.push(b);
+    home.unshift(b+1);
+  }
+  return home;
+}
+
+//co should be an array
+function buildcourse(co) {
+  let home = homecourseorder(stage);
+  let course = [];
+  for (let i = 0; i < rowarr.length; i++) {
+    let old = rowarr[i];
+    let row = [];
+    for (let p = 0; p < stage; p++) {
+      if ([1,stage].includes(old[p])) {
+        row.push(old[p])
+      } else {
+        let b = old[p];
+        let j = home.indexOf(b);
+        row.push(co[j]);
+      }
+    }
+    course.push(row);
+  }
+  return course;
+}
+
+//build plain bob leadheads for stage n
+function plainleadheads(n) {
+  let lhs = [];
+  let co = homecourseorder(n);
+  co.unshift(n);
+  for (let i = 0; i < n-2; i++) {
+    let row = [1];
+    for (let b = 2; b <= n; b++) {
+      let j = co.indexOf(b);
+      let k = j - i - 1;
+      if (k < 0) k = co.length + k;
+      row.push(co[k]);
+    }
+    lhs.push(row);
+  }
+  return lhs;
+}
+
+//compare rows of course against rowarr
+function comparecourse(course) {
+  //build index, key is row from rowarr, value is row number in rowarr
+  let dex = {};
+  for (let i = 0; i < rowarr.length; i++) {
+    let str = rowstring(rowarr[i]);
+    dex[str] = i+1;
+  }
+  //check if each row of course is in dex
+  //dice has arrays with two numbers: index of a row in rowarr, index of same row in course
+  let dice = [];
+  for (let i = 0; i < course.length; i++) {
+    let str = rowstring(course[i]);
+    let n = dex[str];
+    if (n) {
+      dice.push([n-1, i]);
+    }
+  }
+  return dice;
+}
+
+//find bits false against the plain course
+function findfalsefast() {
+  //assuming treble is hunt bell
+  let lhstrings = [];
+  let lhs = [];
+  let trebleplaces = [];
+  for (let i = 0; i < methodinfo.leadlength; i++) {
+    let r = rowarr[i];
+    let tp = r.indexOf(1);
+    if (trebleplaces.includes(tp)) {
+      let aa = getlhsfromrow(rowarr[i]);
+      aa.forEach(a => {
+        let s = rowstring(a);
+        if (!lhstrings.includes(s)) {
+          lhstrings.push(s);
+          lhs.push(a);
+        }
+      });
+    } else {
+      trebleplaces.push(tp);
+    }
+  }
+  let cc = [];
+  let cstrings = [];
+  lhs.forEach(lh => {
+    let c = getcofromlh(lh);
+    if (!cstrings.includes(rowstring(c))) {
+      cstrings.push(rowstring(c));
+      cc.push(c);
+    }
+  });
+  return buildfalse(cc);
+}
+
+//let's say r is an array
+function getlhsfromrow(r) {
+  let trebleplace = r.indexOf(1);
+  let lhs = [];
+  for (let i = 0; i < methodinfo.leadlength; i++) {
+    if (rowarr[i].indexOf(1) === trebleplace) {
+      let lh = [1];
+      for (let b = 2; b <= stage; b++) {
+        let p = rowarr[i].indexOf(b);
+        lh.push(r[p]);
+      }
+      lhs.push(lh);
+    }
+  }
+  return lhs;
+}
+
+
+function buildfalse(cos) {
+  //for each course order
+  //build the course
+  //comparecourse(course)
+  let leadlength = methodinfo.leadlength;
+  let fcourses = [];
+  for (let i = 0; i < cos.length; i++) {
+    let co = cos[i];
+    let course = buildcourse(co);
+    let f = comparecourse(course);
+    if (f.length) {
+      let leads = [];
+      for (let j = 1; j < stage; j++) {
+        let rows = [];
+        let lh = j === 1 ? course[course.length-1] : course[j*leadlength-1];
+        f.forEach(a => {
+          let n = a[1];
+          if (n < j*leadlength && n > (j-1)*leadlength-1) {
+            rows.push(n-(j-1)*leadlength+1);
+          }
+        });
+        if (rows.length) {
+          leads.push({lh: rowstring(lh), rownums: rows});
+        }
+      }
+      fcourses.push({co: co, rownums: f, leads: leads});
+    }
+  }
+  return fcourses;
+}
+
+//specifically false against the plain course
+function findfalse() {
+  //for each course order
+  //build the course
+  //comparecourse(course)
+  let cos = stage === 6 ? courseorders : courseorders.filter(o => o.incourse === true && o.tentogether === true);
+  
+  let leadlength = methodinfo.leadlength;
+  //console.log("number of course orders to check: "+cos.length);
+  let fcourses = buildfalse(cos.slice(1).map(o => o.co));
+  return fcourses;
+}
+
+//given a coursing order, find the courses that are false against it
+function getfalse(co) {
+  let fcos = [];
+  let home = homecourseorder(stage);
+  methodinfo.fcourses.forEach(o => {
+    let str = "";
+    for (let i = 0; i < co.length; i++) {
+      let n = o.co[i];
+      let j = home.indexOf(n);
+      str += co[j];
+    }
+    fcos.push(str);
+  });
+  return fcos;
+}
+
+//given a false course order, find its equivalent for the course order co
+//doesn't actually have to be false
+// plain course : fco :: co : eq
+function getfalse2(fco, co) {
+  let eq = [];
+  let home = homecourseorder(co.length+1);
+  for (let i = 0; i < co.length; i++) {
+    let b = fco[i];
+    let j = home.indexOf(b);
+    eq.push(co[j]);
+  }
+  return eq;
+}
+
+//lh must be THE leadhead as an array of numbers
+function leadorder(lh) {
+  let order = [stage];
+  let i = lh.indexOf(stage);
+  do {
+    order.push(i+1);
+    i = lh.indexOf(i+1);
+  } while (i != stage-1);
+  methodinfo.pborder = order;
+}
+
+//lh as array
+//returns co without tenor
+function getcofromlh(lh) {
+  let home = homecourseorder(lh.length);
+  home.unshift(lh.length);
+  let co = [];
+  for (let i = 0; i < home.length; i++) {
+    co.push(lh[home[i]-1]);
+  }
+  let i = co.indexOf(lh.length);
+  let rot = co.slice(i+1);
+  if (i > 0) {
+    rot.push(...co.slice(0,i));
+  }
+  return rot;
+}
+
+//input c does not include tenor
+function getlhsfromco(c) {
+  let plainco = [c.length+2].concat(homecourseorder(c.length+2));
+  let co = [c.length+2].concat(c);
+  
+  let plain = plainleadheads(co.length+1);
+  plain.unshift(places.slice(0,co.length+1).split("").map(bellnum));
+  //console.log(plain);
+  let pb = methodinfo.pborder;
+  let lhs = [];
+  for (let i = 0; i < pb.length; i++) {
+    let home = plain.find(a => a.indexOf(co.length+1)+1 === pb[i]);
+    let lh = [1];
+    for (let j = 1; j < home.length; j++) {
+      let b = home[j];
+      let k = plainco.indexOf(b);
+      lh.push(co[k]);
+    }
+    lhs.push(lh);
+  }
+  return lhs;
+}
+
+//lh needs to be an array
+function getfalsefromlead(lh) {
+  let leadco = getcofromlh(lh);
+  
+  let results = [];
+  let tenorplace = lh.indexOf(stage);
+  
+  for (let i = 0; i < methodinfo.fcourses.length; i++) {
+    let o = methodinfo.fcourses[i];
+    let co = getfalse2(o.co, leadco);
+    
+    let coleads = getlhsfromco(co);
+    
+    let leads = [];
+    for (let j = 0; j < o.leads.length; j++) {
+      let lo = o.leads[j];
+      let olh = lo.lh.split("").map(bellnum);
+      if (olh.indexOf(stage) === tenorplace) {
+        let lead = coleads.find(a => a[tenorplace] === stage);
+        leads.push(rowstring(lead));
+      }
+    }
+    leads.forEach(n => {
+      results.push({co: co, lh: n});
+    });
+    
+  }
+  //console.log("result of getfalsefromlead");
+    //console.log(results);
+  return results;
+}
+
+
+
 //lh as array
 //given a leadhead, build the options for the next leadhead
 function nextleads(lh) {
@@ -686,33 +825,121 @@ function applypn(row, pn) {
   return next;
 }
 
-//click on a leadhead in the workspace (not in table)
-function worklhclick(e) {
-  $("#chosenleads li.selected").removeClass("selected");
-  $("li.close").removeClass("close");
-  $(e.currentTarget).addClass("selected");
-  activelh = e.currentTarget.id.slice(2);
-  //figure out leadheads that can come next
-  let next = nextleads(activelh.split("").map(bellnum));
-  nextavailable = [];
-  ["plain", "b14"].forEach(key => {
-    nextavailable.push(rowstring(next[key]));
-  });
-  //singles only allowed on minor (currently)
-  if (stage === 6) {
-    let key = calltype === "near" ? "s1234" : "s1456";
-    nextavailable.push(rowstring(next[key]));
-  }
-  //highlight next in workspace and source course orders
-  nextavailable.forEach(r => {
-    if ($("#al"+r).length) {
-      $("#al"+r).addClass("close");
-    } else {
-      if ($("#l"+r).length) $("#l"+r).addClass("close");
-      let co = getcofromlh(r.split("").map(bellnum));
-      //console.log(co);
-      let costr = rowstring(co);
-      $("li#c"+costr).addClass("close");
+//pattern has the form of a row where some characters are specific bells and others are "x";
+function getrowsfrompattern(pattern) {
+  let rows = [];
+  //holder for bells represented by x
+  let v = [];
+  let rounds = places.slice(0, pattern.length);
+  for (let i = 0; i < rounds.length; i++) {
+    if (!pattern.includes(rounds[i])) {
+      v.push(bellnum(rounds[i]));
     }
+  }
+  if (v.length) {
+    let extent = buildextent(v);
+    for (let i = 0; i < extent.length; i++) {
+      let row = [];
+      let sub = extent[i];
+      let k = 0;
+      for (let j = 0; j < pattern.length; j++) {
+        let c = pattern[j];
+        if (c === "x") {
+          row.push(sub[k]);
+          k++;
+        } else {
+          row.push(bellnum(c));
+        }
+      }
+      rows.push(row);
+    }
+  } else {
+    rows.push(pattern.split("").map(bellnum));
+  }
+  return rows;
+}
+
+//take a pattern with parentheses and return an array of patterns with no parentheses
+//no nested parentheses allowed
+function handlepatterns(pattern) {
+  let chars = 0;
+  let openparens = [];
+  let closeparens = [];
+  let inside;
+  let xinside;
+  //collect indexes of parentheses
+  for (let i = 0; i < pattern.length; i++) {
+    let c = pattern[i];
+    switch (c) {
+      case "(":
+        inside = true;
+        openparens.push(i);
+        break;
+      case ")":
+        inside = false;
+        closeparens.push(i);
+        break;
+      default:
+        if (inside && c === "x") xinside = true;
+        chars++;
+    }
+  }
+  if (openparens.length != closeparens.length || !closeparens.every((n,i) => n > openparens[i]) || chars != stage || xinside) {
+    return [];
+  } else {
+    let current = [pattern];
+    let next = [];
+    for (let i = openparens.length-1; i > -1; i--) {
+      for (let j = 0; j < current.length; j++) {
+        let pp = expandgroup(current[j], openparens[i], closeparens[i]);
+        next.push(...pp);
+      }
+      current = next;
+      next = [];
+    }
+    return current;
+  }
+}
+
+//take a pattern with a group in parentheses and build an extent of that group
+//pattern is a string
+function expandgroup(pattern, start, end) {
+  let patterns = [];
+  let chunk = [];
+  for (let j = start+1; j < end; j++) {
+    chunk.push(bellnum(pattern[j]));
+  }
+  let ext = buildextent(chunk);
+  ext.forEach(a => {
+    let p = pattern.slice(0,start) + rowstring(a) + pattern.slice(end+1);
+    patterns.push(p);
   });
+  return patterns;
+}
+
+//given row r, build all the permutations
+function buildextent(r) {
+  let n = r.length;
+  let arr = [];
+  if (n === 2) {
+    return extenttwo(r);
+  } else if (n < 13) {
+    for (let i = 0; i < n; i++) {
+      let others = []; //as in "not i"
+      for (let j = 0; j < n; j++) {
+        if (j != i) others.push(r[j]);
+      }
+      let ends = buildextent(others);
+      ends.forEach(a => {
+        a.unshift(r[i]);
+        arr.push(a);
+      });
+    }
+  }
+  return arr;
+}
+
+function extenttwo(r) {
+  let arr = [r, [r[1], r[0]]];
+  return arr;
 }
