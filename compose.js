@@ -564,13 +564,13 @@ function comparecourse(course) {
 //find bits false against the plain course
 function findfalsefast() {
   //assuming treble is hunt bell
-  let lhstrings = [];
+  let lhstrings = [places.slice(0,stage)];
   let lhs = [];
   let trebleplaces = [];
   for (let i = 0; i < methodinfo.leadlength; i++) {
     let r = rowarr[i];
     let tp = r.indexOf(1);
-    if (trebleplaces.includes(tp)) {
+    if (!trebleplaces.includes(tp)) {
       let aa = getlhsfromrow(rowarr[i]);
       aa.forEach(a => {
         let s = rowstring(a);
@@ -579,7 +579,6 @@ function findfalsefast() {
           lhs.push(a);
         }
       });
-    } else {
       trebleplaces.push(tp);
     }
   }
@@ -618,9 +617,11 @@ function buildfalse(cos) {
   //build the course
   //comparecourse(course)
   let leadlength = methodinfo.leadlength;
+  let extra = 0;
   let fcourses = [];
   for (let i = 0; i < cos.length; i++) {
     let co = cos[i];
+    let o = courseorders.find(o => rowstring(o.co) === rowstring(co));
     let course = buildcourse(co);
     let f = comparecourse(course);
     if (f.length) {
@@ -639,8 +640,10 @@ function buildfalse(cos) {
         }
       }
       fcourses.push({co: co, rownums: f, leads: leads});
+      if (o && (!o.incourse || !o.tentogether)) extra++;
     }
   }
+  console.log(extra);
   return fcourses;
 }
 
