@@ -93,6 +93,9 @@ table {
   overflow: scroll;
 }
 
+#leadheads {
+  padding-right: 12px;
+}
 
 li.inuse {
   background-color: rgb(209, 246, 209);
