@@ -117,7 +117,7 @@ function getcomplib(mid) {
           //console.log(courseorders[0]);
           methodinfo.fcourses = findfalse();
           console.log(methodinfo.fcourses);
-          console.log(findfalsefast());
+          console.log(findfalseagain());
           setuptools();
         });
       }
@@ -563,6 +563,43 @@ function comparecourse(course) {
 }
 
 //find bits false against the plain course
+//maybe without unnecessary steps??
+function findfalseagain() {
+  let home = rowstring(homecourseorder(stage));
+  let cc = [];
+  let otherc = [];
+  let cstrings = [];
+  for (let i = 0; i < rowarr.length; i++) {
+    let r = rowarr[i];
+    let aa = findcofromrow(r);
+    let plaincount = 0;
+    aa.forEach(a => {
+      let s = rowstring(a);
+      let o = courseorders.find(obj => rowstring(obj.co) === s);
+      if (s === home) {
+        plaincount++;
+      } else if (!cstrings.includes(s)) {
+        cstrings.push(s);
+        if (o.incourse && o.tentogether) {
+          cc.push(a);
+        } else {
+          otherc.push({co: s, count: 1});
+        }
+      } else if (!o.incourse || !o.tentogether) {
+        let other = otherc.find(obj => obj.co === s);
+        other.count++;
+      }
+    });
+    if (plaincount > 1) console.log("falseness in plain course??");
+  }
+  console.log(otherc);
+  let sum = 0;
+  otherc.forEach(o => sum += o.count);
+  console.log(sum + " rows in otherc");
+  return buildfalse(cc);
+}
+
+//find bits false against the plain course
 function findfalsefast() {
   //assuming treble is hunt bell
   //assuming palindromic??? not currently
@@ -570,7 +607,6 @@ function findfalsefast() {
   plainlhs.push(places.slice(0,stage));
   let lhstrings = [];
   let lhs = [];
-  let trebleplaces = [];
   for (let i = 0; i < rowarr.length; i++) {
     let r = rowarr[i];
     let aa = getlhsfromrow(rowarr[i]);
@@ -722,12 +758,47 @@ function getcofromlh(lh) {
   for (let i = 0; i < home.length; i++) {
     co.push(lh[home[i]-1]);
   }
-  let i = co.indexOf(lh.length);
+  
+  let rot = rotateco(co,lh.length);
+  return rot;
+}
+
+//rotate a coursing order to put the tenor first, and remove the tenor
+function rotateco(co,n) {
+  let i = co.indexOf(n);
   let rot = co.slice(i+1);
   if (i > 0) {
     rot.push(...co.slice(0,i));
   }
   return rot;
+}
+
+//get course orders from row
+//row array
+//assume treble is hunt bell
+function findcofromrow(row) {
+  let trebleplace = row.indexOf(1);
+  let plainrows = rowarr.filter((r,i) => {
+    return i < methodinfo.leadlength && r[trebleplace] === 1;
+  });
+  let home = homecourseorder(stage);
+  home.unshift(stage);
+  let cos = [];
+  for (let i = 0; i < plainrows.length; i++) {
+    //get process of row to course order
+    let order = [];
+    for (let j = 0; j < home.length; j++) {
+      order.push(plainrows[i].indexOf(home[j]));
+    }
+    //apply that process to given row
+    let co = [];
+    for (let j = 0; j < order.length; j++) {
+      co.push(row[order[j]]);
+    }
+    let rot = rotateco(co, stage);
+    cos.push(rot);
+  }
+  return cos;
 }
 
 //input c does not include tenor
