@@ -5,7 +5,7 @@ var url = "https://api.complib.org/";
 var svg;
 //holder of plain course
 var rowarr = [];
-var arr2 = [];
+
 //stage of method from complib
 var stage;
 var numbells;
@@ -17,8 +17,10 @@ var methodinfo = {};
 var compinfo = {};
 //holder of all the course orders for the stage
 var courseorders;
-//leadhead in source material that has been clicked on
+//leadhead in source material that has been clicked on - attempting not to use this anymore
 var selectedlh;
+//clicked leadheads in source material
+var lhstoadd = [];
 //leadhead in workspace that has been clicked on
 var activelh;
 //leadheads that can come directly after activelh
@@ -135,7 +137,7 @@ function checkbit(value, bit) {
 //add course orders to display
 function setuptools() {
   let cos = stage === 6 ? courseorders : courseorders.filter(o => o.incourse === true && o.tentogether === true);
-  console.log(cos[0]);
+  //console.log(cos[0]);
   compinfo.courses = {};
   compinfo.leads = {};
   compinfo.courses[rowstring(cos[0].co)] = ["inuse"];
@@ -523,6 +525,7 @@ function getfalsefromlead(lh) {
 //display the leadheads in that course order
 function courseorderclick(e) {
   selectedlh = null;
+  lhstoadd = [];
   $("#addtoworkspace").addClass("disabled");
   $("#courseorders li.selected").removeClass("selected");
   $(e.currentTarget).addClass("selected");
@@ -567,55 +570,64 @@ function leadheadclick(e) {
   console.log(e.shiftKey);
   if (!$(e.currentTarget).hasClass("inuse")) {
     $("#addtoworkspace").removeClass("disabled");
+    let lh = $(e.currentTarget).text();
+    if (e.shiftKey) {
+      if (!lhstoadd.includes(lh)) lhstoadd.push(lh);
+    } else {
+      lhstoadd = [$(e.currentTarget).text()];
+      $("#leadheads li.selected").removeClass("selected");
+    }
+    $(e.currentTarget).addClass("selected");
   }
-  $("#leadheads li.selected").removeClass("selected");
-  $(e.currentTarget).addClass("selected");
-  selectedlh = $(e.currentTarget).text();
+  
+  
 }
 
-//add selectedlh (from source material) to workspace
+//add items in lhstoadd (from source material) to workspace
 function addtoworkspace(e) {
   if (!$(e.currentTarget).hasClass("disabled")) {
     $(e.currentTarget).addClass("disabled");
-    let lh = selectedlh.split("").map(bellnum);
-    let co = getcofromlh(lh);
-    let costr = rowstring(co);
-    //update compinfo and classes in source material
-    if (!compinfo.courses[costr]) {
-      compinfo.courses[costr] = ["inuse"];
-      $("#c"+costr).addClass("inuse");
-    } else if (!compinfo.courses[costr].includes("inuse")) {
-      compinfo.courses[costr].push("inuse");
-      $("#c"+costr).addClass("inuse");
-    }
-    if (!compinfo.leads[selectedlh]) {
-      compinfo.leads[selectedlh] = ["inuse"];
-      $("#l"+selectedlh).addClass("inuse");
-    }
-    //actually add to workspace
-    $("#chosenleads ul").append(`<li id="al${selectedlh}">${costr}: ${selectedlh}</li>`);
-    let num = $("#chosenleads li").length * methodinfo.leadlength;
-    $("#numberadded").text(`${num} rows`);
-    //update falseness in compinfo and source material display
-    let fleads = getfalsefromlead(lh);
-    //console.log(fleads);
-    fleads.forEach(o => {
-      let s = rowstring(o.co);
-      if (!compinfo.courses[s]) {
-        compinfo.courses[s] = ["false"];
-        $("#c"+s).addClass("false");
-      } else if (!compinfo.courses[s].includes("false")) {
-        compinfo.courses[s].push("false");
-        $("#c"+s).addClass("false");
+    lhstoadd.forEach(selectedlh => {
+      let lh = selectedlh.split("").map(bellnum);
+      let co = getcofromlh(lh);
+      let costr = rowstring(co);
+      //update compinfo and classes in source material
+      if (!compinfo.courses[costr]) {
+        compinfo.courses[costr] = ["inuse"];
+        $("#c"+costr).addClass("inuse");
+      } else if (!compinfo.courses[costr].includes("inuse")) {
+        compinfo.courses[costr].push("inuse");
+        $("#c"+costr).addClass("inuse");
       }
-      if (!compinfo.leads[o.lh]) {
-        compinfo.leads[o.lh] = ["false"];
-      } else if (!compinfo.leads[o.lh].includes("false")) {
-        compinfo.leads[o.lh].push("false");
+      if (!compinfo.leads[selectedlh]) {
+        compinfo.leads[selectedlh] = ["inuse"];
+        $("#l"+selectedlh).addClass("inuse");
       }
-
-    });
+      //actually add to workspace
+      $("#chosenleads ul").append(`<li id="al${selectedlh}">${costr}: ${selectedlh}</li>`);
+      let num = $("#chosenleads li").length * methodinfo.leadlength;
+      $("#numberadded").text(`${num} rows`);
+      //update falseness in compinfo and source material display
+      let fleads = getfalsefromlead(lh);
+      //console.log(fleads);
+      fleads.forEach(o => {
+        let s = rowstring(o.co);
+        if (!compinfo.courses[s]) {
+          compinfo.courses[s] = ["false"];
+          $("#c"+s).addClass("false");
+        } else if (!compinfo.courses[s].includes("false")) {
+          compinfo.courses[s].push("false");
+          $("#c"+s).addClass("false");
+        }
+        if (!compinfo.leads[o.lh]) {
+          compinfo.leads[o.lh] = ["false"];
+        } else if (!compinfo.leads[o.lh].includes("false")) {
+          compinfo.leads[o.lh].push("false");
+        }
+  
+      });
     //console.log(compinfo.leads);
+    });
   }
   
 }
