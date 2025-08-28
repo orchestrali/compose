@@ -99,6 +99,11 @@ table {
 
 #colorkey {
   margin-left: auto;
+  margin-right: 4px;
+}
+
+#colorkey ul {
+  padding-left: 0;
 }
 
 li.false {
