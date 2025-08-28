@@ -576,7 +576,7 @@ function homecourseorder(stage) {
   let home = [];
   for (let b = 2; b < stage; b+=2) {
     home.push(b);
-    home.unshift(b+1);
+    if (b < stage-1) home.unshift(b+1);
   }
   return home;
 }
