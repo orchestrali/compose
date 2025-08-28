@@ -341,7 +341,7 @@ function leadheadclick(e) {
     }
     $(e.currentTarget).addClass("selected");
   }
-  if ($(e.currentTarget).hasClass("hasrow")) {
+  if ($(e.currentTarget).hasClass("hasrow") && lhstoadd.length < 2) {
     let rows = searchresults[selectedco][lh];
     displaysearch(rows);
   }
@@ -400,6 +400,10 @@ function addtoworkspace(e) {
 //click on a leadhead in the workspace (not in table)
 function worklhclick(e) {
   clearsearch();
+  if (lhstoadd.length > 1) {
+    $("#leadheads li.selected").removeClass("selected");
+    lhstoadd = [];
+  }
   $("#chosenleads li.selected").removeClass("selected");
   $("li.close").removeClass("close");
   $(e.currentTarget).addClass("selected");
@@ -410,9 +414,9 @@ function worklhclick(e) {
   ["plain", "b14"].forEach(key => {
     nextavailable.push(rowstring(next[key]));
   });
-  //singles only allowed on minor (currently)
-  if (stage === 6) {
-    let key = calltype === "near" ? "s1234" : "s1456";
+  //singles only allowed on minor and triples (currently)
+  if ([6,7].includes(stage)) {
+    let key = (calltype === "near" || stage === 7) ? "s1234" : "s1456";
     nextavailable.push(rowstring(next[key]));
   }
   //highlight next in workspace and source course orders
