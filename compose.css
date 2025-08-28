@@ -97,10 +97,6 @@ table {
   padding-right: 12px;
 }
 
-li.inuse {
-  background-color: rgb(209, 246, 209);
-}
-
 li.false {
   color: gray;
 }
@@ -114,6 +110,10 @@ li.close {
 }
 td.close {
   background-color: pink;
+}
+
+li.inuse {
+  background-color: rgb(209, 246, 209);
 }
 
 li.hasrow {
