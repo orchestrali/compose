@@ -64,6 +64,7 @@ function subcomplib() {
   methodinfo = {};
   compinfo = {};
   courseorders = [];
+  //set calltype here?
   let num = $("#complibid").val();
   if (num.length > 4 && /^\d+$/.test(num)) {
     getcomplib(num);
@@ -927,7 +928,7 @@ function nextleads(lh) {
     end.push(lh[be-1]);
   }
   next.plain = plainh;
-  let calls = buildcallpns(stage);
+  let calls = buildcallpns(stage, calltype);
   for (let key in calls) {
     next[key] = applypn(end, calls[key]);
   }
@@ -935,17 +936,23 @@ function nextleads(lh) {
 }
 
 //building far calls but not using them yet
-function buildcallpns(n) {
+function buildcallpns(n, ct) {
   let calls = {
     b14: [1,4],
     s1234: [1,2,3,4]
   };
+  if (n%2 === 1) {
+    for (let key in calls) {
+      calls[key].push(n);
+    }
+  }
+  //harder on odd stages...
   let farcalls = {};
   let farb = [1,n-2];
   farcalls["b"+rowstring(farb)] = farb;
   let fars = [1, n-2, n-1, n];
   farcalls["s"+rowstring(fars)] = fars;
-  return calls;
+  return n%2 === 0 && ct === "far" ? farcalls : calls;
 }
 
 var callpos = {5: "V", 6: "X", 7: "S", 8: "E", 9: "N"};
