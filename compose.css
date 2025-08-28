@@ -97,6 +97,10 @@ table {
   padding-right: 12px;
 }
 
+#colorkey {
+  margin-left: auto;
+}
+
 li.false {
   color: gray;
 }
