@@ -112,7 +112,7 @@ function getcomplib(mid) {
         }
         
       }
-      if (![6,8].includes(stage) || !regular) {
+      if (![6,7,8].includes(stage) || !regular) {
         $("#courseorders").append(`<p>Can't work with ${results.title} yet</p>`);
       } else {
         $("h2").text(results.title);
@@ -142,7 +142,7 @@ function checkbit(value, bit) {
 //mark starting course order as in use and find courses false against it
 //add course orders to display
 function setuptools() {
-  let cos = stage === 6 ? courseorders : courseorders.filter(o => o.incourse === true && o.tentogether === true);
+  let cos = [6,7].includes(stage) ? courseorders : courseorders.filter(o => o.incourse === true && o.tentogether === true);
   //console.log(cos[0]);
   compinfo.courses = {};
   compinfo.leads = {};
@@ -747,6 +747,7 @@ function buildfalse(cos) {
   return fcourses;
 }
 
+//old test-them-all version
 //specifically false against the plain course
 function findfalse() {
   //for each course order
