@@ -37,6 +37,9 @@ var gridtarget;
 // plain, bob, or single, if activelh goes into gridtarget
 var connection;
 
+//notes: not sure I'm actually dealing with falseness in the composition
+//option to export something as text????
+
 $(function() {
   $("#composition").svg({onLoad: (o) => {
     svg = o;
@@ -369,7 +372,8 @@ function addtoworkspace(e) {
         $("#l"+selectedlh).addClass("inuse");
       }
       //actually add to workspace
-      $("#chosenleads ul").append(`<li id="al${selectedlh}">${costr}: ${selectedlh}</li>`);
+      let c = $("#l"+selectedlh).hasClass("close") ? ` class="close"` : "";
+      $("#chosenleads ul").append(`<li id="al${selectedlh}"${c}>${costr}: ${selectedlh}</li>`);
       let num = $("#chosenleads li").length * methodinfo.leadlength;
       $("#numberadded").text(`${num} rows`);
       //update falseness in compinfo and source material display
