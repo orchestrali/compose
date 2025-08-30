@@ -106,6 +106,22 @@ table {
   padding-left: 0;
 }
 
+#colorkey li:first-child {
+  background-color: lightblue;
+}
+#colorkey li:nth-child(2) {
+  background-color: rgb(209, 246, 209);
+}
+#colorkey li:nth-child(3) {
+  background-color: pink;
+}
+#colorkey li:nth-child(4) {
+  background-color: lavender;
+}
+#colorkey li:nth-child(5) {
+  color: gray;
+}
+
 li.false {
   color: gray;
 }
