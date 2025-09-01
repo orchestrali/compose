@@ -86,7 +86,7 @@ table {
 }
 
 #courseorders {
-  width: 110px;
+  min-width: 110px;
   max-height: 220px;
   padding-right: 8px;
   border: 1px solid black;
@@ -165,8 +165,11 @@ li:hover {
 }
 
 #chosenleads {
-  width: 200px;
+  min-width: 200px;
   border-right: 1px solid black;
+}
+#chosenleads ul {
+  padding-left: 10px;
 }
 
 #chosencourses {
