@@ -116,12 +116,14 @@ function getcomplib(mid) {
         }
         
       }
-      if (![6,7,8].includes(stage) || !regular) {
+      if (![6,7,8,10].includes(stage) || !regular) {
         $("#courseorders").append(`<p>Can't work with ${results.title} yet</p>`);
       } else {
         $("h2").text(results.title);
-        $.get("courseorder"+stage+".json", function(body) {
+        let n = stage >= 8 ? 8 : stage;
+        $.get("courseorder"+n+".json", function(body) {
           courseorders = body;
+          if (stage > 8) expandcourseorders(stage);
           //console.log(courseorders.length);
           //console.log(courseorders[0]);
           methodinfo.fcourses = findfalseagain();
@@ -544,38 +546,12 @@ function displaysearch(rows) {
 
 //convert bell characters to numbers
 function bellnum(n) {
-  switch (n) {
-    case "0":
-      return 10;
-      break;
-    case "E":
-      return 11;
-      break;
-    case "T":
-      return 12;
-      break;
-    default:
-      return Number(n);
-  }
+  return places.indexOf(n)+1;
 }
 
 //convert array of bell numbers to string of characters
 function rowstring(arr) {
-  let r = arr.map(n => {
-    switch (n) {
-      case 10:
-        return "0";
-        break;
-      case 11:
-        return "E";
-        break;
-      case 12:
-        return "T";
-        break;
-      default:
-        return n;
-    }
-  });
+  let r = arr.map(n => places[n-1]);
   return r.join("");
 }
 
@@ -588,6 +564,16 @@ function homecourseorder(stage) {
     if (b < stage-1) home.unshift(b+1);
   }
   return home;
+}
+
+//adjust major coursing orders for more bells
+function expandcourseorders(n) {
+  for (let b = 8; b < n; b+=2) {
+    courseorders.forEach(o => {
+      o.co.push(b);
+      if (b < stage-1) o.co.unshift(b+1);
+    });
+  }
 }
 
 //co should be an array
