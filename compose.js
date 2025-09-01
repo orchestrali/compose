@@ -655,12 +655,12 @@ function findfalseagain() {
         plaincount++;
       } else if (!cstrings.includes(s)) {
         cstrings.push(s);
-        if (o.incourse && o.tentogether) {
+        if (o && o.incourse && o.tentogether) {
           cc.push(a);
         } else {
           otherc.push({co: s, count: 1});
         }
-      } else if (!o.incourse || !o.tentogether) {
+      } else if (!o || !o.incourse || !o.tentogether) {
         let other = otherc.find(obj => obj.co === s);
         other.count++;
       }
