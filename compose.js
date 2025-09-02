@@ -909,6 +909,7 @@ function getlhsfromco(c) {
 //lh needs to be an array
 function getfalsefromlead(lh) {
   let leadco = getcofromlh(lh);
+  console.log(leadco);
   
   let results = [];
   let tenorplace = lh.indexOf(stage);
@@ -933,8 +934,8 @@ function getfalsefromlead(lh) {
     });
     
   }
-  //console.log("result of getfalsefromlead");
-    //console.log(results);
+  console.log("result of getfalsefromlead");
+    console.log(results);
   return results;
 }
 
