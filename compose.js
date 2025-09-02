@@ -38,6 +38,7 @@ var calltype = "near";
 var gridtarget;
 // plain, bob, or single, if activelh goes into gridtarget
 var connection;
+var connectbelow;
 
 //notes: not sure I'm actually dealing with falseness in the composition
 //option to export something as text????
@@ -268,8 +269,13 @@ function worktablehover(e) {
       }
     }
     let below = ["#r",trow+1,"c1"].join("");
-    if (!$(below) || $(below).text().length === 0 || nextavailable.includes($(below).text())) {
+    let empty = !$(below) || $(below).text().length === 0;
+    if (empty) {
       after = true;
+      connectbelow = "plain";
+    } else if (nextavailable.includes($(below).text())) {
+      after = true;
+      //need to figure out call below!
     }
     //if the composition would work, shade the table cell
     if (before && after) {
@@ -910,7 +916,7 @@ function getlhsfromco(c) {
 //lh needs to be an array
 function getfalsefromlead(lh) {
   let leadco = getcofromlh(lh);
-  console.log(leadco);
+  //console.log(leadco);
   
   let results = [];
   let tenorplace = lh.indexOf(stage);
@@ -918,10 +924,10 @@ function getfalsefromlead(lh) {
   for (let i = 0; i < methodinfo.fcourses.length; i++) {
     let o = methodinfo.fcourses[i];
     let co = getfalse2(o.co, leadco);
-    console.log(co);
+    //console.log(co);
     
     let coleads = getlhsfromco(co);
-    console.log(coleads);
+    //console.log(coleads);
     
     let leads = [];
     for (let j = 0; j < o.leads.length; j++) {
@@ -937,8 +943,8 @@ function getfalsefromlead(lh) {
     });
     
   }
-  console.log("result of getfalsefromlead");
-    console.log(results);
+  //console.log("result of getfalsefromlead");
+    //console.log(results);
   return results;
 }
 
