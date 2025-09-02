@@ -87,7 +87,7 @@ table {
 
 #courseorders {
   min-width: 110px;
-  max-height: 220px;
+  max-height: 280px;
   padding-right: 8px;
   border: 1px solid black;
   overflow: scroll;
