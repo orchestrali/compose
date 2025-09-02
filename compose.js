@@ -116,7 +116,7 @@ function getcomplib(mid) {
         }
         
       }
-      if (![6,7,8,10].includes(stage) || !regular) {
+      if (![6,7,8,9,10,11,12].includes(stage) || !regular) {
         $("#courseorders").append(`<p>Can't work with ${results.title} yet</p>`);
       } else {
         $("h2").text(results.title);
