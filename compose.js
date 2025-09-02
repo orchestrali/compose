@@ -455,7 +455,7 @@ function clearworkselection() {
   gridtarget = null;
   connection = null;
   
-  ["selected", "close", "false"].forEach(c => {
+  ["selected", "close"].forEach(c => {
     $("#chosenleads li."+c).removeClass(c);
   });
   $("#sourcematerial li.close").removeClass("close");
