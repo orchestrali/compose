@@ -917,8 +917,10 @@ function getfalsefromlead(lh) {
   for (let i = 0; i < methodinfo.fcourses.length; i++) {
     let o = methodinfo.fcourses[i];
     let co = getfalse2(o.co, leadco);
+    console.log(co);
     
     let coleads = getlhsfromco(co);
+    console.log(coleads);
     
     let leads = [];
     for (let j = 0; j < o.leads.length; j++) {
