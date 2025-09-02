@@ -223,8 +223,8 @@ function worktableclick(e) {
     $(e.currentTarget).css("background-color", "white");
     if (connection != "plain") {
       let cid = id.slice(0,-1) + "0";
-      let text = connection[0] === "b" ? "-" : "s";
-      $("#"+cid).text(text);
+      //let text = connection[0] === "b" ? "-" : "s";
+      $("#"+cid).text(connection);
     }
   }
 }
@@ -254,9 +254,11 @@ function worktablehover(e) {
       } else {
         let blh = $(prev).text().split("").map(bellnum);
         let next = nextleads(blh);
-        console.log(next);
+        //console.log(next);
         connection = Object.keys(next).find(key => rowstring(next[key]) === activelh);
         if (connection) {
+          let call = getcallname(activelh.split("").map(bellnum), connection[0]);
+          connection = call;
           before = true;
         }
       }
@@ -520,8 +522,9 @@ function handlesearchbar(e) {
         }
       });
     });
-
+    let totalco = 0;
     for (let co in res) {
+      totalco++;
       let found = $("#c"+co).length;
       if (found) {
         searchresults[co] = res[co];
@@ -547,7 +550,7 @@ function handlesearchbar(e) {
     }
     console.log(searched + " rows searched for");
     console.log("rows available: "+rowcount);
-    console.log("additional coursing orders: "+Object.keys(res).length-cocount);
+    console.log("additional coursing orders: "+(totalco-cocount));
   }
 }
 
@@ -977,7 +980,7 @@ var callpos = {5: "V", 6: "X", 7: "S", 8: "E", 9: "N"};
 //lh will need to be array of numbers
 function getcallname(lh, call) {
   let p = lh.indexOf(stage)+1;
-  let name = call === "s" ? "s" : "";
+  let name = call === "s" ? "s" : "-";
   switch (p) {
     case stage:
       name += "H";
