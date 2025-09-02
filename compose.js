@@ -462,7 +462,7 @@ function handlesearchbar(e) {
   clearworkselection();
   clearsearch();
   $("#searchbar p").remove();
-  let text = $("#search").val().toLowerCase();
+  let text = $("#search").val().toUpperCase();
   let problem;
   let patterns = [text];
 
@@ -472,7 +472,7 @@ function handlesearchbar(e) {
     patterns = patternstage(text);
     //problem = "search doesn't match stage";
   } 
-  if (/[^\dxet\(\)]/.test(text)) {
+  if (/[^\dxET\(\)]/.test(text)) {
     problem = "invalid character in search";
   } else if (text.includes("(") || text.includes(")")) {
     let arr = [];
@@ -492,11 +492,13 @@ function handlesearchbar(e) {
   } else {
     let cocount = 0;
     let rowcount = 0;
+    let searched = 0;
     let res = {};
     patterns.forEach(p => {
       let rows = getrowsfrompattern(p);
       //need to get lhs and cos from each row
       rows.forEach(r => {
+        searched++;
         let set = getbothfromrow(r);
         for (let lh in set) {
           let co = set[lh];
@@ -536,6 +538,7 @@ function handlesearchbar(e) {
     if (cocount === 0) {
       $("#searchbar").append(`<p>row not available</p>`);
     }
+    console.log(searched + " rows searched for");
     console.log("rows available: "+rowcount);
   }
 }
