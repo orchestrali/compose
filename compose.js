@@ -1013,7 +1013,7 @@ function applypn(row, pn) {
   return next;
 }
 
-//pattern has the form of a row where some characters are specific bells and others are "x";
+//pattern has the form of a row where some characters are specific bells and others are "X";
 function getrowsfrompattern(pattern) {
   let rows = [];
   //holder for bells represented by x
@@ -1032,7 +1032,7 @@ function getrowsfrompattern(pattern) {
       let k = 0;
       for (let j = 0; j < pattern.length; j++) {
         let c = pattern[j];
-        if (c === "x") {
+        if (c === "X") {
           row.push(sub[k]);
           k++;
         } else {
@@ -1085,7 +1085,7 @@ function handlepatterns(pattern) {
         closeparens.push(i);
         break;
       default:
-        if (inside && c === "x") xinside = true;
+        if (inside && c === "X") xinside = true;
         chars++;
     }
   }
