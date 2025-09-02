@@ -259,8 +259,10 @@ function worktablehover(e) {
         //console.log(next);
         connection = Object.keys(next).find(key => rowstring(next[key]) === activelh);
         if (connection) {
-          let call = getcallname(activelh.split("").map(bellnum), connection[0]);
-          connection = call;
+          if (connection != "plain") {
+            let call = getcallname(activelh.split("").map(bellnum), connection[0]);
+            connection = call;
+          }
           before = true;
         }
       }
