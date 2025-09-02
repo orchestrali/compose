@@ -700,7 +700,7 @@ function getlhsfromrow(r) {
   let trebleplace = r.indexOf(1);
   let lhs = [];
   for (let i = -1; i < methodinfo.leadlength-1; i++) {
-    let row = i === -1 ? places.slice(0,stage).map(bellnum) : rowarr[i];
+    let row = i === -1 ? places.slice(0,stage).split("").map(bellnum) : rowarr[i];
     if (row.indexOf(1) === trebleplace) {
       let lh = [1];
       for (let b = 2; b <= stage; b++) {
