@@ -1059,7 +1059,7 @@ function patternstage(pattern) {
     let p = "";
     for (let j = 0; j < stage; j++) {
       if (j < i || j >= i+n) {
-        p += "x";
+        p += "X";
       } else if (j === i) {
         p += pattern;
       }
