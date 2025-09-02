@@ -541,9 +541,13 @@ function handlesearchbar(e) {
     }
     if (cocount === 0) {
       $("#searchbar").append(`<p>row not available</p>`);
+    } else {
+      let w = rowcount === 1 ? " row" : " rows";
+      $("#searchbar").append(`<p>${rowcount+w} available</p>`);
     }
     console.log(searched + " rows searched for");
     console.log("rows available: "+rowcount);
+    console.log("additional coursing orders: "+Object.keys(res).length-cocount);
   }
 }
 
