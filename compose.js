@@ -29,6 +29,8 @@ var activelh;
 var nextavailable;
 //results from row search field
 var searchresults = {};
+//so I can see them
+var extraresults = {};
 
 var calltype = "near";
 //table cell being hovered over that could receive the current activelh
@@ -459,6 +461,7 @@ function clearworkselection() {
 
 function clearsearch() {
   searchresults = {};
+  extraresults = {};
   $("li.hasrow").removeClass("hasrow");
   $("#leadinfo").children().remove();
 }
@@ -540,6 +543,8 @@ function handlesearchbar(e) {
             displaysearch(res[co][lh]);
           }
         }
+      } else {
+        extraresults[co] = res[co];
       }
     }
     if (cocount === 0) {
