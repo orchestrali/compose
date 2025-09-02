@@ -462,20 +462,31 @@ function handlesearchbar(e) {
   clearworkselection();
   clearsearch();
   $("#searchbar p").remove();
-  let text = $("#search").val();
+  let text = $("#search").val().toLowerCase();
   let problem;
   let patterns = [text];
 
   if (text.length < stage) {
     //currently invalid
-    console.log(patternstage(text));
-    problem = "search doesn't match stage";
-  } else if (/[^\dxet\(\)]/.test(text)) {
+    //console.log(patternstage(text));
+    patterns = patternstage(text);
+    //problem = "search doesn't match stage";
+  } 
+  if (/[^\dxet\(\)]/.test(text)) {
     problem = "invalid character in search";
   } else if (text.includes("(") || text.includes(")")) {
-    patterns = handlepatterns(text);
-    if (patterns.length === 0) problem = "problem with parentheses";
+    let arr = [];
+    patterns.forEach(p => {
+      let a = handlepatterns(p);
+      if (a.length === 0) {
+        problem = "problem with parentheses";
+      } else {
+        arr.push(...a);
+      }
+    });
+    patterns = arr;
   }
+  
   if (problem) {
     $("#searchbar").append(`<p>${problem}</p>`);
   } else {
