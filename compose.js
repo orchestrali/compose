@@ -468,6 +468,7 @@ function handlesearchbar(e) {
 
   if (text.length < stage) {
     //currently invalid
+    console.log(patternstage(text));
     problem = "search doesn't match stage";
   } else if (/[^\dxet\(\)]/.test(text)) {
     problem = "invalid character in search";
@@ -1030,6 +1031,23 @@ function getrowsfrompattern(pattern) {
     rows.push(pattern.split("").map(bellnum));
   }
   return rows;
+}
+
+function patternstage(pattern) {
+  let n = pattern.length;
+  let res = [];
+  for (let i = 0; i <= stage-n; i++) {
+    let p = "";
+    for (let j = 0; j < stage; j++) {
+      if (j < i || j >= i+n) {
+        p += "x";
+      } else if (j === i) {
+        p += pattern;
+      }
+    }
+    res.push(p);
+  }
+  return res;
 }
 
 //take a pattern with parentheses and return an array of patterns with no parentheses
