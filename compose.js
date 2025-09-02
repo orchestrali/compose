@@ -62,8 +62,12 @@ $(function() {
 //submit a complib method id
 function subcomplib() {
   //clear previous stuff
+  //this still isn't everything
   $("#rowcolumn,#catcolumn,#courseorders,#chosenleads ul").contents().detach();
-  $("h2,#numberadded").text("");
+  $("h2,#numberadded,#workspacegrid td").text("");
+  $(".removelh").removeClass("removelh");
+  ["hasrow","close","false"].forEach(w => $("."+w).removeClass(w));
+  lhstoadd = [];
   methodinfo = {};
   compinfo = {};
   courseorders = [];
@@ -466,26 +470,26 @@ function handlesearchbar(e) {
   let problem;
   let patterns = [text];
 
-  if (text.length < stage) {
-    //currently invalid
-    //console.log(patternstage(text));
-    patterns = patternstage(text);
-    //problem = "search doesn't match stage";
-  } 
+  
   if (/[^\dXET\(\)]/.test(text)) {
     problem = "invalid character in search";
+  } else if (text.split("").some(c => places.indexOf(c) >= stage)) {
+    problem = "search doesn't match stage";
   } else if (text.includes("(") || text.includes(")")) {
+    patterns = handlepatterns(text);
+    if (patterns.length === 0) problem = "problem with parentheses";
+  }
+  if (!problem && patterns[0].length < stage) {
+    //currently invalid
+    //console.log(patternstage(text));
     let arr = [];
     patterns.forEach(p => {
-      let a = handlepatterns(p);
-      if (a.length === 0) {
-        problem = "problem with parentheses";
-      } else {
-        arr.push(...a);
-      }
+      let res = patternstage(p);
+      arr.push(...res);
     });
     patterns = arr;
-  }
+    //problem = "search doesn't match stage";
+  } 
   
   if (problem) {
     $("#searchbar").append(`<p>${problem}</p>`);
@@ -695,11 +699,12 @@ function findfalseagain() {
 function getlhsfromrow(r) {
   let trebleplace = r.indexOf(1);
   let lhs = [];
-  for (let i = 0; i < methodinfo.leadlength; i++) {
-    if (rowarr[i].indexOf(1) === trebleplace) {
+  for (let i = -1; i < methodinfo.leadlength-1; i++) {
+    let row = i === -1 ? places.slice(0,stage).map(bellnum) : rowarr[i];
+    if (row.indexOf(1) === trebleplace) {
       let lh = [1];
       for (let b = 2; b <= stage; b++) {
-        let p = rowarr[i].indexOf(b);
+        let p = row.indexOf(b);
         lh.push(r[p]);
       }
       lhs.push(lh);
@@ -1089,7 +1094,7 @@ function handlepatterns(pattern) {
         chars++;
     }
   }
-  if (openparens.length != closeparens.length || !closeparens.every((n,i) => n > openparens[i]) || chars != stage || xinside) {
+  if (openparens.length != closeparens.length || !closeparens.every((n,i) => n > openparens[i]) || chars > stage || xinside) {
     return [];
   } else {
     let current = [pattern];
