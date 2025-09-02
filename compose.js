@@ -472,7 +472,7 @@ function handlesearchbar(e) {
     patterns = patternstage(text);
     //problem = "search doesn't match stage";
   } 
-  if (/[^\dxET\(\)]/.test(text)) {
+  if (/[^\dXET\(\)]/.test(text)) {
     problem = "invalid character in search";
   } else if (text.includes("(") || text.includes(")")) {
     let arr = [];
