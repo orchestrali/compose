@@ -809,9 +809,10 @@ function getfalse(co) {
 //given a false course order, find its equivalent for the course order co
 //doesn't actually have to be false
 // plain course : fco :: co : eq
+//inputs do not include the tenor!!
 function getfalse2(fco, co) {
   let eq = [];
-  let home = homecourseorder(co.length+1);
+  let home = homecourseorder(co.length+2);
   for (let i = 0; i < co.length; i++) {
     let b = fco[i];
     let j = home.indexOf(b);
