@@ -295,7 +295,7 @@ function worktablehover(e) {
       let i = nextavailable.indexOf($(below).text());
       if (i > 0) {
         let c = i === 1 ? "b" : "s";
-        connectbelow = getcallname(nextavailable[i], c);
+        connectbelow = getcallname(nextavailable[i].split("").map(bellnum), c);
       }
     }
     //if the composition would work, shade the table cell
