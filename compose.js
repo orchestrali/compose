@@ -229,11 +229,26 @@ function worktableclick(e) {
       //let text = connection[0] === "b" ? "-" : "s";
       $("#"+cid).text(connection);
     }
+    if (connectbelow != "plain") {
+      let rownum = Number(id.slice(1,-2))+1;
+      let cid = "#r"+rownum+"c0";
+      $(cid).text(connectbelow);
+    }
+    //mark lh as used in the workspace list
+    if (places.includes(activelh)) {
+      //need to count these to check when it comes round
+    } else {
+      $("#al"+activelh).addClass("false");
+    }
+    
   }
 }
 
 //remove a lh from worktable
 function removelhclick(e) {
+  let id = e.currentTarget.id.slice(0,-1)+"1";
+  let aid = $("#"+id).text();
+  $("#al"+aid).removeClass("false");
   $(e.currentTarget).removeClass("removelh");
   $(e.currentTarget).parent().children().text("");
 }
@@ -275,7 +290,13 @@ function worktablehover(e) {
       connectbelow = "plain";
     } else if (nextavailable.includes($(below).text())) {
       after = true;
+      connectbelow = "plain";
       //need to figure out call below!
+      let i = nextavailable.indexOf($(below).text());
+      if (i > 0) {
+        let c = i === 1 ? "b" : "s";
+        connectbelow = getcallname(nextavailable[i], c);
+      }
     }
     //if the composition would work, shade the table cell
     if (before && after) {
@@ -284,6 +305,7 @@ function worktablehover(e) {
     } else {
       gridtarget = null;
       connection = null;
+      connectbelow = null;
     }
     
   }
@@ -291,6 +313,7 @@ function worktablehover(e) {
 function worktableleave(e) {
   gridtarget = null;
   connection = null;
+  connectbelow = null;
   $(e.currentTarget).css("background-color", "white");
 }
 
@@ -460,6 +483,7 @@ function clearworkselection() {
   nextavailable = [];
   gridtarget = null;
   connection = null;
+  connectbelow = null;
   
   ["selected", "close"].forEach(c => {
     $("#chosenleads li."+c).removeClass(c);
