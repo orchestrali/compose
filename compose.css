@@ -159,6 +159,7 @@ li:hover {
 #workspace {
   width: 846px;
   min-height: 400px;
+  margin-bottom: 20px;
   border: 1px solid black;
   display: flex;
   flex-flow: row;
