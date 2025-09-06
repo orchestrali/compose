@@ -243,7 +243,7 @@ function worktableclick(e) {
     } else {
       $("#al"+activelh).addClass("false");
     }
-    complist = getworktablecontents();
+    displayfullcomp();
   }
 }
 
@@ -253,7 +253,7 @@ function getworktablecontents() {
   $("#workspacegrid tr").each((i) => {
     let id = ["#r",i+1,"c1"].join("");
     let lh = $(id).text();
-    console.log(i, lh);
+    //console.log(i, lh);
     if (lh.length) {
       let cid = id.slice(0,-1) + "0";
       let call = $(cid).text();
@@ -273,6 +273,7 @@ function removelhclick(e) {
   $("#al"+aid).removeClass("false");
   $(e.currentTarget).removeClass("removelh");
   $(e.currentTarget).parent().children().text("");
+  displayfullcomp();
 }
 
 //check if a lh can be added to a worktable cell
@@ -627,6 +628,79 @@ function displaysearch(rows) {
   $("#leadinfo").append(html);
 }
 
+
+function displayfullcomp() {
+  complist = getworktablecontents();
+  $("#composition").contents().remove();
+  complist.forEach(a => {
+    $("#composition").append(`<div class="grid"></div>`);
+    let length = a.length*methodinfo.leadlength*20 + 20;
+    let parent = svg.svg($("div.grid:last-child"), null, null, 200, length, {xmlns: "http://www.w3.org/2000/svg", "xmlns:xlink": "http://www.w3.org/1999/xlink"});
+    let rows = [];
+    for (let i = 0; i < a.length; i++) {
+      let o = a[i];
+      let first = {row: o.lh.split(""), lh: true};
+      if (o.call.length) first.call = o.call;
+      rows.push(first);
+      if (i === a.length-1 && places.includes(o.lh)) {
+        //this is the last leadhead and it's rounds
+        //actually don't do anything more
+      } else {
+        let lead = buildlead(o.lh);
+        rows.push(...lead);
+      }
+      
+    }
+    displaycomprows(parent, rows);
+  });
+}
+
+function displaycomprows(parent, rows) {
+  let lineg = svg.group(parent, {style: "stroke: #111111; stroke-width: 1px; fill: none;"});
+  let treblepp = [];
+  let tenorpp = [];
+  //add text and lines above leadheads
+  let textg = svg.group(parent, {style: "font-family: Verdana, sans-serif; fill: #000000; font-size: 16px;"});
+  rows.forEach((o,i) => {
+    let y = 16+i*20;
+    if (o.call) {
+      svg.text(textg, 10, y, o.call);
+    }
+    for (let j = 0; j < o.row.length; j++) {
+      svg.text(textg, 40+j*16, y, o.row[j]);
+      if (o.row[j] === "1") treblepp.push(j);
+      if (o.row[j] === places[stage-1]) tenorpp.push(j);
+    }
+    if (i > 0 && o.lh) {
+      svg.line(lineg, 38, y-16, 38+o.row.length*16, y-16);
+    }
+  });
+  
+  //draw treble path
+  let trebleg = svg.group(parent, {style: "stroke: red; stroke-width: 1px; fill: none;"});
+  svg.path(trebleg, buildsvgpath(treblepp));
+  //draw tenor path
+  let tenorg = svg.group(parent, {style: "stroke: blue; stroke-width: 2px; fill: none;"});
+  svg.path(tenorg, buildsvgpath(tenorpp));
+}
+
+function buildsvgpath(pp) {
+  let current = pp[0];
+  let path = ["M", 40+16*current, "10"].join(" ");
+  for (let i = 1; i < pp.length; i++) {
+    let p = pp[i];
+    if (p === current) {
+      path += " v 20";
+    } else if (p > current) {
+      path += " l 16 20";
+    } else if (p < current) {
+      path += " l -16 20";
+    }
+    current = p;
+  }
+  return path;
+}
+
 //BELLRINGING FUNCTIONS
 
 //convert bell characters to numbers
@@ -659,6 +733,25 @@ function expandcourseorders(n) {
       if (b < stage-1) o.co.unshift(b+1);
     });
   }
+}
+
+//...actually lh could be string
+//does not do the last row of the lead
+function buildlead(lh) {
+  let rows = [];
+  for (let i = 0; i < methodinfo.leadlength-; i++) {
+    let old = rowarr[i];
+    let o = {};
+    let row = [];
+    //for each place, find bell in plain course, use that as index
+    for (let p = 0; p < stage; p++) {
+      let j = old[p]-1;
+      row.push(lh[j]);
+    }
+    o.row = row;
+    rows.push(o);
+  }
+  return rows;
 }
 
 //co should be an array
