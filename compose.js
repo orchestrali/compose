@@ -264,6 +264,7 @@ function getworktablecontents() {
       current = [];
     }
   });
+  if (current.length) contents.push(current);
   return contents;
 }
 
