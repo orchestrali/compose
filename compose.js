@@ -250,8 +250,9 @@ function worktableclick(e) {
 function getworktablecontents() {
   let contents = [];
   let current = [];
-  $("#workspacegrid tr").each(() => {
+  $("#workspacegrid tr").each((i) => {
     let lh = $(this).children("td.column1").text();
+    console.log(i, lh);
     if (lh.length) {
       let call = $(this).children("td:first-child").text();
       current.push({lh: lh, call: call});
