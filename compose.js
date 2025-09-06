@@ -28,6 +28,7 @@ var activelh;
 //leadheads that can come directly after activelh
 var nextavailable;
 //results from row search field
+//keys are coursing order strings, values are objects with leadhead strings as keys, arrays of rowstrings as values
 var searchresults = {};
 //so I can see them
 var extraresults = {};
@@ -420,6 +421,10 @@ function addtoworkspace(e) {
   if (!$(e.currentTarget).hasClass("disabled")) {
     $(e.currentTarget).addClass("disabled");
     lhstoadd.forEach(selectedlh => {
+      if (searchresults[selectedco] && searchresults[selectedco][selectedlh]) {
+        //save the lh and rows - or just rows???
+        searchadded.push(...searchresults[selectedco][selectedlh]);
+      }
       let lh = selectedlh.split("").map(bellnum);
       let co = getcofromlh(lh);
       let costr = rowstring(co);
@@ -628,7 +633,7 @@ function displaysearch(rows) {
   $("#leadinfo").append(html);
 }
 
-
+//draw the actual rows
 function displayfullcomp() {
   complist = getworktablecontents();
   $("#composition").contents().remove();
@@ -658,6 +663,7 @@ function displayfullcomp() {
 function displaycomprows(parent, rows) {
   let lineg = svg.group(parent, {style: "stroke: #111111; stroke-width: 1px; fill: none;"});
   svg.line(lineg, 38, 20, 38+rows[0].row.length*16, 20);
+  let rectg = svg.group(parent, {style: "stroke: none; fill: lavender;"});
   let treblepp = [];
   let tenorpp = [];
   //add text and lines above leadheads
@@ -666,6 +672,9 @@ function displaycomprows(parent, rows) {
     let y = 16+i*20;
     if (o.call) {
       svg.text(textg, 10, y, o.call);
+    }
+    if (searchadded.includes(o.row.join(""))) {
+      svg.rect(rectg, 38, y-16, o.row.length*16, 20);
     }
     for (let j = 0; j < o.row.length; j++) {
       svg.text(textg, 40+j*16, y, o.row[j]);
