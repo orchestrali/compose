@@ -145,6 +145,9 @@ li.inuse {
 #courseorders li.inuse.close {
   background-color: pink;
 }
+#courseorders li.inuse.close.selected {
+  background-color: lightblue;
+}
 
 li.hasrow {
   background-color: lavender;
