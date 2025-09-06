@@ -634,7 +634,7 @@ function displayfullcomp() {
   $("#composition").contents().remove();
   complist.forEach(a => {
     $("#composition").append(`<div class="grid"></div>`);
-    let length = a.length*methodinfo.leadlength*20 + 20;
+    let length = a.length*methodinfo.leadlength*20 + 50;
     let parent = svg.svg($("div.grid:last-child"), null, null, 200, length, {xmlns: "http://www.w3.org/2000/svg", "xmlns:xlink": "http://www.w3.org/1999/xlink"});
     let rows = [];
     for (let i = 0; i < a.length; i++) {
@@ -642,7 +642,7 @@ function displayfullcomp() {
       let first = {row: o.lh.split(""), lh: true};
       if (o.call.length) first.call = o.call;
       rows.push(first);
-      if (i === a.length-1 && places.includes(o.lh)) {
+      if (i > 0 && i === a.length-1 && places.includes(o.lh)) {
         //this is the last leadhead and it's rounds
         //actually don't do anything more
       } else {
@@ -657,6 +657,7 @@ function displayfullcomp() {
 
 function displaycomprows(parent, rows) {
   let lineg = svg.group(parent, {style: "stroke: #111111; stroke-width: 1px; fill: none;"});
+  svg.line(lineg, 38, 20, 38+rows[0].row.length*16, 20);
   let treblepp = [];
   let tenorpp = [];
   //add text and lines above leadheads
@@ -686,7 +687,7 @@ function displaycomprows(parent, rows) {
 
 function buildsvgpath(pp) {
   let current = pp[0];
-  let path = ["M", 40+16*current, "10"].join(" ");
+  let path = ["M", 45+16*current, "10"].join(" ");
   for (let i = 1; i < pp.length; i++) {
     let p = pp[i];
     if (p === current) {
