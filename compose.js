@@ -739,7 +739,7 @@ function expandcourseorders(n) {
 //does not do the last row of the lead
 function buildlead(lh) {
   let rows = [];
-  for (let i = 0; i < methodinfo.leadlength-; i++) {
+  for (let i = 0; i < methodinfo.leadlength-1; i++) {
     let old = rowarr[i];
     let o = {};
     let row = [];
