@@ -251,10 +251,12 @@ function getworktablecontents() {
   let contents = [];
   let current = [];
   $("#workspacegrid tr").each((i) => {
-    let lh = $(this).children("td.column1").text();
+    let id = ["#r",i+1,"c1"].join("");
+    let lh = $(id).text();
     console.log(i, lh);
     if (lh.length) {
-      let call = $(this).children("td:first-child").text();
+      let cid = id.slice(0,-1) + "0";
+      let call = $(cid).text();
       current.push({lh: lh, call: call});
     } else {
       if (current.length) contents.push(current);
