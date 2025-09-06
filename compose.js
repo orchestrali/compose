@@ -39,7 +39,10 @@ var gridtarget;
 // plain, bob, or single, if activelh goes into gridtarget
 var connection;
 var connectbelow;
-
+//if a pattern is searched for and resulting leadheads are added to workspace, save those
+var searchadded = [];
+//holder for composition leadhead list
+var complist;
 //notes: not sure I'm actually dealing with falseness in the composition
 //option to export something as text????
 
@@ -240,8 +243,24 @@ function worktableclick(e) {
     } else {
       $("#al"+activelh).addClass("false");
     }
-    
+    complist = getworktablecontents();
   }
+}
+
+function getworktablecontents() {
+  let contents = [];
+  let current = [];
+  $("#workspacegrid tr").each(() => {
+    let lh = $(this).children("td.column1").text();
+    if (lh.length) {
+      let call = $(this).children("td:first-child").text();
+      current.push({lh: lh, call: call});
+    } else {
+      if (current.length) contents.push(current);
+      current = [];
+    }
+  });
+  return contents;
 }
 
 //remove a lh from worktable
