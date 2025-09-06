@@ -141,6 +141,11 @@ li.inuse {
   background-color: rgb(209, 246, 209);
 }
 
+/* show close rather than inuse for course orders - could be more complicated, if leads are unused?? */
+#courseorders li.inuse.close {
+  background-color: pink;
+}
+
 li.hasrow {
   background-color: lavender;
 }
