@@ -11,7 +11,7 @@ var stage;
 var numbells;
 var tenor;
 
-//store info: leadlength, leadhead, leadend, pborder, fcourses
+//store info: leadlength, leadhead, leadend, pborder, fcourses, title
 var methodinfo = {};
 //compinfo.courses, compinfo.leads - both indexes of things in use and/or false
 var compinfo = {};
@@ -46,6 +46,8 @@ var searchadded = [];
 var complist;
 //notes: not sure I'm actually dealing with falseness in the composition
 //option to export something as text????
+//put course orders/leadheads in multiple spans so they can highlight multiple colors???
+//add some determination of composition coming round
 
 $(function() {
   $("#composition").svg({onLoad: (o) => {
@@ -63,6 +65,7 @@ $(function() {
   $("#workspacegrid").on("mouseleave", "td.column1", worktableleave);
   $("#workspacegrid").on("click", "td.column1", worktableclick);
   $("#workspacegrid").on("click", ".removelh", removelhclick);
+  
   $("#searchbutton").on("click", handlesearchbar);
 });
 
@@ -70,15 +73,17 @@ $(function() {
 function subcomplib() {
   //clear previous stuff
   //this still isn't everything
-  $("#rowcolumn,#catcolumn,#courseorders,#chosenleads ul").contents().detach();
+  $("#courseorders,#leadheads,#leadinfo,#chosenleads ul,#composition,#compsummary").contents().detach();
+  $("#addrows").remove();
   $("h2,#numberadded,#workspacegrid td").text("");
   $(".removelh").removeClass("removelh");
-  ["hasrow","close","false"].forEach(w => $("."+w).removeClass(w));
+  ["hasrow","close","false"].forEach(w => $("."+w).removeClass(w)); //uhhhh shouldn't need this? they should all be gone???
   lhstoadd = [];
   methodinfo = {};
   compinfo = {};
   courseorders = [];
   //set calltype here?
+  calltype = $("#farcalls").is(":checked") ? "far" : "near";
   let num = $("#complibid").val();
   if (num.length > 4 && /^\d+$/.test(num)) {
     getcomplib(num);
@@ -131,6 +136,7 @@ function getcomplib(mid) {
         $("#courseorders").append(`<p>Can't work with ${results.title} yet</p>`);
       } else {
         $("h2").text(results.title);
+        methodinfo.title = results.title;
         let n = stage >= 8 ? 8 : stage;
         $.get("courseorder"+n+".json", function(body) {
           courseorders = body;
@@ -410,6 +416,7 @@ function leadheadclick(e) {
     }
     $(e.currentTarget).addClass("selected");
   }
+  //if the leadhead is part of the search results, display the rows in the lead that match
   if ($(e.currentTarget).hasClass("hasrow") && lhstoadd.length < 2) {
     let rows = searchresults[selectedco][lh];
     displaysearch(rows);
@@ -485,13 +492,14 @@ function worklhclick(e) {
   //figure out leadheads that can come next
   let next = nextleads(activelh.split("").map(bellnum));
   nextavailable = [];
-  ["plain", "b14"].forEach(key => {
+  
+  ["plain", "bob"].forEach(key => {
     nextavailable.push(rowstring(next[key]));
   });
   //singles only allowed on minor and triples (currently)
   if ([6,7].includes(stage)) {
-    let key = (calltype === "near" || stage === 7) ? "s1234" : "s1456";
-    nextavailable.push(rowstring(next[key]));
+    //let key = (calltype === "near" || stage === 7) ? "s1234" : "s1456";
+    nextavailable.push(rowstring(next.single));
   }
   //highlight next in workspace and source course orders
   nextavailable.forEach(r => {
@@ -546,7 +554,7 @@ function handlesearchbar(e) {
     if (patterns.length === 0) problem = "problem with parentheses";
   }
   if (!problem && patterns[0].length < stage) {
-    //currently invalid
+    
     //console.log(patternstage(text));
     let arr = [];
     patterns.forEach(p => {
@@ -635,11 +643,15 @@ function displaysearch(rows) {
 }
 
 //draw the actual rows
+//should do summary of the composition here too
 function displayfullcomp() {
   complist = getworktablecontents();
   $("#composition").contents().remove();
+  let totalrows = 0;
+  $("#composition").append(`<h4></h4>`);
   complist.forEach(a => {
     $("#composition").append(`<div class="grid"></div>`);
+    totalrows += a.length*methodinfo.leadlength;
     let length = a.length*methodinfo.leadlength*20 + 50;
     let parent = svg.svg($("div.grid:last-child"), null, null, 200, length, {xmlns: "http://www.w3.org/2000/svg", "xmlns:xlink": "http://www.w3.org/1999/xlink"});
     let rows = [];
@@ -651,6 +663,7 @@ function displayfullcomp() {
       if (i > 0 && i === a.length-1 && places.includes(o.lh)) {
         //this is the last leadhead and it's rounds
         //actually don't do anything more
+        totalrows -= methodinfo.leadlength;
       } else {
         let lead = buildlead(o.lh);
         rows.push(...lead);
@@ -659,6 +672,7 @@ function displayfullcomp() {
     }
     displaycomprows(parent, rows);
   });
+  $("#composition h4").text(totalrows + " " + methodinfo.title);
 }
 
 function displaycomprows(parent, rows) {
@@ -695,6 +709,7 @@ function displaycomprows(parent, rows) {
   svg.path(tenorg, buildsvgpath(tenorpp));
 }
 
+//pp is array of place numbers
 function buildsvgpath(pp) {
   let current = pp[0];
   let path = ["M", 45+16*current, "10"].join(" ");
@@ -978,6 +993,7 @@ function getfalse2(fco, co) {
 }
 
 //lh must be THE leadhead as an array of numbers
+//only for monocyclic methods with treble as hunt bell
 function leadorder(lh) {
   let order = [stage];
   let i = lh.indexOf(stage);
@@ -1107,9 +1123,13 @@ function nextleads(lh) {
   let tenorplace = lh.indexOf(stage)+1;
   let mlh = methodinfo.leadhead.split("").map(bellnum);
   let mle = methodinfo.leadend.split("").map(bellnum);
-  let plainh = [1];
-  let end = [1];
-  for (let i = 1; i < lh.length; i++) {
+  if (calltype === "far" && stage%2 === 1) {
+    //calls apply earlier
+    mle = rowarr[methodinfo.leadlength-3];
+  }
+  let plainh = [];
+  let end = [];
+  for (let i = 0; i < lh.length; i++) {
     let bh = mlh[i];
     let be = mle[i];
     plainh.push(lh[bh-1]);
@@ -1118,16 +1138,18 @@ function nextleads(lh) {
   next.plain = plainh;
   let calls = buildcallpns(stage, calltype);
   for (let key in calls) {
-    next[key] = applypn(end, calls[key]);
+    let row = applypn(end, calls[key]);
+    next[key] = stage%2 === 0 || calltype === "near" ? row : applypn(row, [1]);
   }
   return next;
 }
 
 //building far calls but not using them yet
+//calltype adjustments...
 function buildcallpns(n, ct) {
   let calls = {
-    b14: [1,4],
-    s1234: [1,2,3,4]
+    bob: [1,4],
+    single: [1,2,3,4]
   };
   if (n%2 === 1) {
     for (let key in calls) {
@@ -1136,33 +1158,39 @@ function buildcallpns(n, ct) {
   }
   //harder on odd stages...
   let farcalls = {};
-  let farb = [1,n-2];
-  farcalls["b"+rowstring(farb)] = farb;
+  let farb = [1, n-2];
   let fars = [1, n-2, n-1, n];
-  farcalls["s"+rowstring(fars)] = fars;
-  return n%2 === 0 && ct === "far" ? farcalls : calls;
+  if (n%2 === 1) {
+    farb.shift();
+    fars.shift();
+  }
+  farcalls.bob = farb;
+  farcalls.single = fars;
+  return ct === "far" ? farcalls : calls;
 }
 
 var callpos = {5: "V", 6: "X", 7: "S", 8: "E", 9: "N"};
 //lh will need to be array of numbers
 function getcallname(lh, call) {
+  //tenor place
   let p = lh.indexOf(stage)+1;
-  let name = call === "s" ? "s" : "-";
+  let single = call === "s";
+  let name = single ? "s" : "-";
   switch (p) {
     case stage:
       name += "H";
       break;
     case 2:
-      //needs updating for far calls????
-      name += call === "s" ? "B" : "I";
+      
+      name += calltype === "far" ? "I" : single ? "B" : "I";
       break;
     case 3:
-      //needs updating for far calls????
-      name += call === "s" ? "T" : "B";
+      
+      name += calltype === "far" ? "B" : single ? "T" : "B";
       break;
     case 4:
       name += "F";
-      //might need to change for far calls??
+      //might need to change for far calls?? no don't think so??
       break;
     case stage-1:
       name += stage%2 === 0 ? "W" : "M";
