@@ -17,6 +17,12 @@ body {
   color: gray;
 }
 
+fieldset.borderless {
+  border: 0;
+  padding: 0;
+  margin: 0;
+}
+
 form {
   margin-bottom: 25px;
   padding: 15px;
