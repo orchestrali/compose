@@ -544,8 +544,9 @@ function handlesearchbar(e) {
   let problem;
   let patterns = [text];
 
-  
-  if (/[^\dXET\(\)]/.test(text)) {
+  if (/^X+$/.test(text)) {
+    problem = "all rows match!";
+  } else if (/[^\dXET\(\)]/.test(text)) {
     problem = "invalid character in search";
   } else if (text.split("").some(c => places.indexOf(c) >= stage)) {
     problem = "search doesn't match stage";
