@@ -86,7 +86,8 @@ function subcomplib() {
   calltype = $("#farcalls").is(":checked") ? "far" : "near";
   let num = $("#complibid").val();
   if (num.length > 4 && /^\d+$/.test(num)) {
-    getcomplib(num);
+    let access = $("#accesskey").val() || "";
+    getcomplib(num, access);
   }
 }
 
@@ -101,10 +102,10 @@ let example = {
   divisionEnds: [Number],
   rows: [["row", "spoken call", "row analysis flags"]]
 };
-function getcomplib(mid) {
+function getcomplib(mid, access) {
   var xhr = new XMLHttpRequest();
-  
-  xhr.open('GET', url+"method/"+mid+"/rows", true);
+  let q = access.length ? "?accessKey="+access : "";
+  xhr.open('GET', url+"method/"+mid+"/rows"+q, true);
   xhr.send();
   
   xhr.onload = function() {
