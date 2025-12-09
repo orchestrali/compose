@@ -729,6 +729,7 @@ function displaycomprows(parent, rows) {
   let lineg = svg.group(parent, {style: "stroke: #111111; stroke-width: 1px; fill: none;"});
   svg.line(lineg, 38, 20, 38+rows[0].row.length*16, 20);
   let rectg = svg.group(parent, {style: "stroke: none; fill: lavender;"});
+  let goodg = svg.group(parent, {style: "stroke: none; fill: lightgreen;"});
   let treblepp = [];
   let tenorpp = [];
   //add text and lines above leadheads
@@ -738,9 +739,21 @@ function displaycomprows(parent, rows) {
     if (o.call) {
       svg.text(textg, 10, y, o.call);
     }
+    let evaluation = places.includes(o.row.join("")) ? [] : evaluaterow(o.row);
+    let purple;
     if (searchadded.includes(o.row.join(""))) {
+      purple = true;
       svg.rect(rectg, 38, y-16, o.row.length*16, 20);
     }
+    let words = [];
+    evaluation.forEach(ch => {
+      if (!purple) svg.rect(goodg, 38+ch.start*16, y-16, ch.size*16, 20);
+      words.push(ch.what);
+    });
+    if (words.length) {
+      svg.text(textg, 80+o.row.length*16, y, words.join("; "));
+    }
+    
     for (let j = 0; j < o.row.length; j++) {
       svg.text(textg, 40+j*16, y, o.row[j]);
       if (o.row[j] === "1") treblepp.push(j);
@@ -775,6 +788,125 @@ function buildsvgpath(pp) {
     current = p;
   }
   return path;
+}
+
+//row is array of strings
+function evaluaterow(row) {
+  let res = [];
+  let nums = row.map(s => places.indexOf(s)+1);
+  let tenorhome = nums[row.length-1] === row.length;
+  let diffs = [];
+  let absdd = [];
+  let pairs = [];
+  let between = [];
+  let odddd = [];
+  let evendd = [];
+  for (let i = 1; i < row.length; i++) {
+    let d = nums[i]-nums[i-1];
+    diffs.push(d);
+    absdd.push(Math.abs(d));
+    i%2 === 1 ? pairs.push(d) : between.push(d);
+    if (i%2 === 0) {
+      odddd.push(nums[i]-nums[i-2]);
+    } else if (i > 1) {
+      evendd.push(nums[i]-nums[i-2]);
+    }
+  }
+  let nonsteps = [];
+  let nonskips = [];
+  for (let i = 0; i < absdd.length; i++) {
+    if (absdd[i] != 1) nonsteps.push(i);
+    if (absdd[i] != 2) nonskips.push(i);
+  }
+  let absstr = rowstring(absdd);
+  
+  let chunk = {};
+  
+  if (nonsteps.length === 0 && diffs[0] === -1) {
+    chunk = {
+      start: 0,
+      size: row.length,
+      what: "Backrounds"
+    };
+  }
+  
+  if (nonskips.length === 1 && tenorhome) {
+    chunk.start = 0;
+    chunk.size = row.length;
+    chunk.what = row[0] === "1" ? "Queens" : "Kings";
+  }
+  
+  if (evendd.every(n => n === 1) && tenorhome && odddd.every(n => [1,-1].includes(n))) {
+    chunk.start = 0;
+    chunk.size = row.length;
+    chunk.what = odddd[0] === 1 ? "Tittums" : "Exploded Tittums";
+  }
+  
+  if (nonsteps.length === 1) {
+    chunk.start = 0;
+    chunk.size = row.length;
+    if ([0,row.length-2].includes(nonsteps[0])) {
+      chunk.what = (row.length-1)+"-bell run";
+    } else if ([1,row.length-3].includes(nonsteps[0]) && diffs[0] != diffs[diffs.length-1]) {
+      chunk.what = "near miss"; //of rounds or backrounds
+    } else {
+      chunk.what = "two runs"; //includes waterfall & reverse, see-saw and variants
+    }
+  }
+  
+  if (nonsteps.length === 2 && absstr.includes("212")) {
+    chunk.start = 0;
+    chunk.size = row.length;
+    chunk.what = "near miss";
+  }
+  if (nonsteps.length === 2 && nonsteps.includes(0) && nonsteps.includes(diffs.length-1)) {
+    chunk.start = 0;
+    chunk.size = row.length;
+    chunk.what = (row.length-2)+"-bell run";
+  }
+  
+  if (chunk.what) {
+    res.push(chunk);
+  } else {
+    if (absstr.startsWith("111")) {
+      chunk.start = 0;
+      chunk.size = nonsteps[0]+1;
+      chunk.what = chunk.size+"-bell run";
+      res.push(chunk);
+    }
+    if (absstr.endsWith("111")) {
+      let end = {
+        start: nonsteps[nonsteps.length-1]+1,
+        size: diffs.length-nonsteps[nonsteps.length-1],
+      };
+      end.what = end.size+"-bell run";
+      res.push(end);
+    }
+    
+    if (tenorhome && nonskips[nonskips.length-1] < diffs.length-2) {
+      let last = nonskips[nonskips.length-1];
+      let prev = nonskips[nonskips.length-2];
+      if (last-prev === diffs.length-last) {
+        let end = {
+          size: (last-prev)*2,
+          what: "Queensy"
+        };
+        end.start = row.length-end.size;
+        res.push(end);
+      }
+    }
+    
+    if (tenorhome && absstr.endsWith("322")) {
+      let end = {
+        start: row.length-4,
+        size: 4,
+        what: "arpeggio"
+      };
+      res.push(end);
+    }
+    
+  }
+  return res;
 }
 
 
