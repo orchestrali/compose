@@ -688,7 +688,7 @@ function displayfullcomp() {
   $("#composition").append(`<h4></h4>`);
   let compsegments = [];
   complist.forEach(a => {
-    let compsummary = a.map(o => o.call).join("");
+    let compsummary = a.map(o => o.call).join("").replace(/\-/g, "");
     compsegments.push(compsummary);
     $("#composition").append(`<div class="grid"></div>`);
     totalrows += a.length*methodinfo.leadlength;
