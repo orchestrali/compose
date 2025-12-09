@@ -48,6 +48,7 @@ var complist;
 //option to export something as text????
 //put course orders/leadheads in multiple spans so they can highlight multiple colors???
 //add some determination of composition coming round
+//add a method info panel at the top!
 
 $(function() {
   $("#composition").svg({onLoad: (o) => {
@@ -170,12 +171,14 @@ function setuptools() {
   //console.log(cos[0]);
   compinfo.courses = {};
   compinfo.leads = {};
+  compinfo.falseleads = {};
   compinfo.courses[rowstring(cos[0].co)] = ["inuse"];
   compinfo.leads[places.slice(0,stage)] = ["inuse"];
   let fleads = getfalsefromlead(places.slice(0,stage).split("").map(bellnum));
   fleads.forEach(o => {
     compinfo.courses[rowstring(o.co)] = ["false"];
     compinfo.leads[o.lh] = ["false"];
+    compinfo.falseleads[o.lh] = [places.slice(0,stage)];
   });
   let html = `<ul>
   <li id="c${rowstring(cos[0].co)}" class="inuse">${rowstring(cos[0].co)}</li>
@@ -422,6 +425,11 @@ function leadheadclick(e) {
     let rows = searchresults[selectedco][lh];
     displaysearch(rows);
   }
+
+  //if the leadhead is false against something in the workspace, display what
+  if ($(e.currentTarget).hasClass("false") && lhstoadd.length < 2) {
+    displayfalse(lh);
+  }
   
 }
 
@@ -470,6 +478,11 @@ function addtoworkspace(e) {
           compinfo.leads[o.lh] = ["false"];
         } else if (!compinfo.leads[o.lh].includes("false")) {
           compinfo.leads[o.lh].push("false");
+        }
+        if (!compinfo.falseleads[o.lh]) {
+          compinfo.falseleads[o.lh] = [selectedlh];
+        } else if (!compinfo.falseleads[o.lh].includes(selectedlh)) {
+          compinfo.falseleads[o.lh].push(selectedlh);
         }
   
       });
@@ -644,6 +657,22 @@ function displaysearch(rows) {
   $("#leadinfo").append(html);
 }
 
+//given the selected leadhead which is false against something in the workspace
+//in the source material info section, display the leadhead(s) that conflict
+//lh needs to be a string
+function displayfalse(lh) {
+  let flh = compinfo.falseleads[lh];
+  let html = `<p>Active leads that share a row or rows with this lead:</p>
+  <ul>
+  `;
+  flh.forEach(r => {
+    html += `<li>${r}</li>
+    `;
+  });
+  html += `</ul>`;
+  $("#leadinfo").append(html);
+}
+
 //draw the actual rows
 //should do summary of the composition here too
 function displayfullcomp() {
@@ -729,7 +758,11 @@ function buildsvgpath(pp) {
   return path;
 }
 
-//BELLRINGING FUNCTIONS
+
+
+
+
+// **** BELLRINGING FUNCTIONS ****
 
 //convert bell characters to numbers
 function bellnum(n) {
