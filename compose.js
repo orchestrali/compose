@@ -586,6 +586,7 @@ function handlesearchbar(e) {
     let cocount = 0;
     let rowcount = 0;
     let searched = 0;
+    let availrows = [];
     let res = {};
     patterns.forEach(p => {
       let rows = getrowsfrompattern(p);
@@ -618,6 +619,11 @@ function handlesearchbar(e) {
         cocount++;
         for (let lh in res[co]) {
           rowcount += res[co][lh].length;
+          res[co][lh].forEach(r => {
+            if (!availrows.includes(r)) {
+              availrows.push(r);
+            }
+          });
           if ($("#al"+lh).length) {
             $("#al"+lh).addClass("hasrow");
           }
@@ -635,7 +641,7 @@ function handlesearchbar(e) {
       $("#searchbar").append(`<p>row not available</p>`);
     } else {
       let w = rowcount === 1 ? " row" : " rows";
-      $("#searchbar").append(`<p>${rowcount+w} available</p>`);
+      $("#searchbar").append(`<p>${rowcount+w} available (${availrows.length} unique)</p>`);
     }
     console.log(searched + " rows searched for");
     console.log("rows available: "+rowcount);
@@ -680,7 +686,10 @@ function displayfullcomp() {
   $("#composition").contents().remove();
   let totalrows = 0;
   $("#composition").append(`<h4></h4>`);
+  let compsegments = [];
   complist.forEach(a => {
+    let compsummary = a.map(o => o.call).join("");
+    compsegments.push(compsummary);
     $("#composition").append(`<div class="grid"></div>`);
     totalrows += a.length*methodinfo.leadlength;
     let length = a.length*methodinfo.leadlength*20 + 50;
@@ -703,6 +712,16 @@ function displayfullcomp() {
     }
     displaycomprows(parent, rows);
   });
+  let html = "";
+  if (compsegments.length === 1) {
+    html = `<p>Composition:</p>
+    <p>${compsegments[0]}</p>`;
+  } else {
+    compsegments.forEach((s,i) => {
+      html += `<p>Segment ${i}: ${s}</p>`;
+    });
+  }
+  $("#compsummary").html(html);
   $("#composition h4").text(totalrows + " " + methodinfo.title);
 }
 
