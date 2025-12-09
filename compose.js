@@ -693,7 +693,7 @@ function displayfullcomp() {
     $("#composition").append(`<div class="grid"></div>`);
     totalrows += a.length*methodinfo.leadlength;
     let length = a.length*methodinfo.leadlength*20 + 50;
-    let parent = svg.svg($("div.grid:last-child"), null, null, 200, length, {xmlns: "http://www.w3.org/2000/svg", "xmlns:xlink": "http://www.w3.org/1999/xlink"});
+    let parent = svg.svg($("div.grid:last-child"), null, null, 400, length, {xmlns: "http://www.w3.org/2000/svg", "xmlns:xlink": "http://www.w3.org/1999/xlink"});
     let rows = [];
     for (let i = 0; i < a.length; i++) {
       let o = a[i];
@@ -855,9 +855,13 @@ function evaluaterow(row) {
   }
   
   if (nonsteps.length === 2 && absstr.includes("212")) {
-    chunk.start = 0;
-    chunk.size = row.length;
-    chunk.what = "near miss";
+    let filter = diffs.filter(n => n === 1);
+    //the 1 between the 2s needs to be the opposite direction of the other 1s
+    if (filter.length < diffs.length-2) {
+      chunk.start = 0;
+      chunk.size = row.length;
+      chunk.what = "near miss";
+    }
   }
   if (nonsteps.length === 2 && nonsteps.includes(0) && nonsteps.includes(diffs.length-1)) {
     chunk.start = 0;
